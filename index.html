@@ -1777,33 +1777,33 @@
         return isNaN(val) ? 0 : val;
       };
 
-      socket.on('bateria', (data) => {
-        state.battery = parseVal(data);
-        updateUI();
-      });
+      socket.on('telemetria', (data) => {
+        console.log('Telemetría recibida en PWA:', data);
+        
+        const { velocidad, bateria, combustible, temperatura, aceleracion, distancia, modo, latitud, longitud } = data;
 
-      socket.on('combustible', (data) => {
-        state.fuel = parseVal(data);
-        updateUI();
-      });
+        // Actualizar variables de estado de los indicadores
+        if (velocidad !== undefined) state.speed = parseVal(velocidad);
+        if (bateria !== undefined) state.battery = parseVal(bateria);
+        if (combustible !== undefined) state.fuel = parseVal(combustible);
+        if (temperatura !== undefined) state.temperature = parseVal(temperatura);
+        if (aceleracion !== undefined) state.acceleration = parseVal(aceleracion);
+        if (distancia !== undefined) state.distance = parseVal(distancia);
 
-      socket.on('temperatura', (data) => {
-        state.temperature = parseVal(data);
-        updateUI();
-      });
+        // Actualizaciones directas al DOM para modo y coordenadas
+        if (modo !== undefined) {
+          const modoEl = document.getElementById('tele-modo-val');
+          if (modoEl) modoEl.textContent = modo;
+        }
 
-      socket.on('velocidad', (data) => {
-        state.speed = parseVal(data);
-        updateUI();
-      });
+        if (latitud !== undefined && longitud !== undefined) {
+          const latEl = document.getElementById('tele-lat-val');
+          const lonEl = document.getElementById('tele-lon-val');
+          if (latEl) latEl.textContent = latitud;
+          if (lonEl) lonEl.textContent = longitud;
+        }
 
-      socket.on('aceleracion', (data) => {
-        state.acceleration = parseVal(data);
-        updateUI();
-      });
-
-      socket.on('distancia', (data) => {
-        state.distance = parseVal(data);
+        // Refrescar los indicadores principales
         updateUI();
       });
 
