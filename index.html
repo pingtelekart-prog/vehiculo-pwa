@@ -1710,8 +1710,6 @@
       const tempVal = document.getElementById('tele-temp-val');
       const distVal = document.getElementById('tele-distance-val');
 
-      if (!spdGauge) return;
-
       let state = {
         speed: 0,
         acceleration: 0,
@@ -1728,43 +1726,55 @@
         element.style.strokeDashoffset = offset;
       };
 
-      const socket = io('https://vehiculo-backend.onrender.com');
+      const socket = io('https://vehiculo-backend.onrender.com', {
+        transports: ['websocket', 'polling']
+      });
 
       const updateUI = () => {
-        // UI Updates
-        const spdPct = (state.speed / 50) * 100;
-        setGauge(spdGauge, spdPct);
-        spdVal.textContent = Math.round(state.speed);
-
-        // Accel: map absolute 0-5 to 0-100%
-        const absAcc = Math.abs(state.acceleration);
-        const accPct = (absAcc / 5) * 100;
-        setGauge(accGauge, accPct);
-        accVal.textContent = state.acceleration.toFixed(1);
-
-        battVal.textContent = Math.round(state.battery) + '%';
-        battBar.style.width = state.battery + '%';
-        if (state.battery > 50) {
-          battBar.style.backgroundColor = '#34C759';
-          battIcon.style.color = '#34C759';
-          battIcon.textContent = 'battery_charging_full';
-        } else if (state.battery > 20) {
-          battBar.style.backgroundColor = '#FFCC00';
-          battIcon.style.color = '#FFCC00';
-          battIcon.textContent = 'battery_5_bar';
-        } else {
-          battBar.style.backgroundColor = '#FF3B30';
-          battIcon.style.color = '#FF3B30';
-          battIcon.textContent = 'battery_alert';
+        // UI Updates with DOM checks
+        if (spdGauge && spdVal) {
+          const spdPct = (state.speed / 50) * 100;
+          setGauge(spdGauge, spdPct);
+          spdVal.textContent = Math.round(state.speed);
         }
 
-        fuelVal.textContent = Math.round(state.fuel) + '%';
-        fuelBar.style.width = state.fuel + '%';
+        if (accGauge && accVal) {
+          // Accel: map absolute 0-5 to 0-100%
+          const absAcc = Math.abs(state.acceleration);
+          const accPct = (absAcc / 5) * 100;
+          setGauge(accGauge, accPct);
+          accVal.textContent = state.acceleration.toFixed(1);
+        }
 
-        // Temp: 20 -> 0%, 120 -> 100%
-        const tempPct = Math.max(0, Math.min(100, ((state.temperature - 20) / 100) * 100));
-        tempVal.textContent = Math.round(state.temperature) + '°C';
-        if (tempMask) tempMask.style.width = (100 - tempPct) + '%';
+        if (battVal && battBar && battIcon) {
+          battVal.textContent = Math.round(state.battery) + '%';
+          battBar.style.width = state.battery + '%';
+          if (state.battery > 50) {
+            battBar.style.backgroundColor = '#34C759';
+            battIcon.style.color = '#34C759';
+            battIcon.textContent = 'battery_charging_full';
+          } else if (state.battery > 20) {
+            battBar.style.backgroundColor = '#FFCC00';
+            battIcon.style.color = '#FFCC00';
+            battIcon.textContent = 'battery_5_bar';
+          } else {
+            battBar.style.backgroundColor = '#FF3B30';
+            battIcon.style.color = '#FF3B30';
+            battIcon.textContent = 'battery_alert';
+          }
+        }
+
+        if (fuelVal && fuelBar) {
+          fuelVal.textContent = Math.round(state.fuel) + '%';
+          fuelBar.style.width = state.fuel + '%';
+        }
+
+        if (tempVal) {
+          // Temp: 20 -> 0%, 120 -> 100%
+          const tempPct = Math.max(0, Math.min(100, ((state.temperature - 20) / 100) * 100));
+          tempVal.textContent = Math.round(state.temperature) + '°C';
+          if (tempMask) tempMask.style.width = (100 - tempPct) + '%';
+        }
 
         if (distVal) {
           const dStr = state.distance.toFixed(1).padStart(6, '0');
@@ -1778,7 +1788,7 @@
       };
 
       socket.on('telemetria', (data) => {
-        console.log('Telemetría recibida en PWA:', data);
+        console.log('Datos recibidos del backend:', data);
         
         const { velocidad, bateria, combustible, temperatura, aceleracion, distancia, modo, latitud, longitud } = data;
 
