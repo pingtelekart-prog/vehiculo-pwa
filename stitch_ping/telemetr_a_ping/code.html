@@ -1,0 +1,263 @@
+<!DOCTYPE html><html class="light" lang="es" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport">
+<title>PING - Telemetría</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-dim": "#dbd9db",
+                        "on-tertiary-container": "#a88c69",
+                        "on-primary": "#ffffff",
+                        "on-primary-fixed-variant": "#38485a",
+                        "primary-fixed": "#d2e4fb",
+                        "surface-variant": "#e4e2e3",
+                        "tertiary-container": "#38260b",
+                        "tertiary-fixed": "#feddb5",
+                        "inverse-on-surface": "#f2f0f2",
+                        "on-secondary-fixed": "#001a41",
+                        "primary-container": "#1a2b3c",
+                        "on-tertiary-fixed": "#281802",
+                        "outline": "#74777d",
+                        "on-tertiary": "#ffffff",
+                        "tertiary": "#211200",
+                        "error": "#ba1a1a",
+                        "secondary-container": "#0070eb",
+                        "background": "#fbf9fa",
+                        "on-background": "#1b1c1d",
+                        "surface-container-low": "#f5f3f4",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-bright": "#fbf9fa",
+                        "secondary-fixed": "#d8e2ff",
+                        "on-secondary-fixed-variant": "#004493",
+                        "outline-variant": "#c4c6cd",
+                        "inverse-surface": "#303032",
+                        "secondary": "#0058bc",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#584326",
+                        "primary-fixed-dim": "#b7c8de",
+                        "surface-container-high": "#e9e7e9",
+                        "on-primary-fixed": "#0b1d2d",
+                        "on-surface-variant": "#44474c",
+                        "inverse-primary": "#b7c8de",
+                        "secondary-fixed-dim": "#adc6ff",
+                        "on-secondary-container": "#fefcff",
+                        "on-error": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "surface-container": "#efedef",
+                        "tertiary-fixed-dim": "#e1c29b",
+                        "surface": "#fbf9fa",
+                        "surface-tint": "#4f6073",
+                        "surface-container-highest": "#e4e2e3",
+                        "on-surface": "#1b1c1d",
+                        "on-secondary": "#ffffff",
+                        "primary": "#041627",
+                        "on-primary-container": "#8192a7"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-page": "20px",
+                        "safe-area-bottom": "34px",
+                        "gutter-grid": "16px",
+                        "stack-sm": "8px",
+                        "stack-md": "16px",
+                        "touch-target-min": "48px",
+                        "stack-lg": "24px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "headline-md": ["Inter"],
+                        "label-caps": ["JetBrains Mono"],
+                        "status-number": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-lg": ["17px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "30px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "status-number": ["18px", { "lineHeight": "24px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .semi-circle-gauge {
+            width: 100%;
+            height: 0;
+            padding-bottom: 50%;
+            position: relative;
+            overflow: hidden;
+        }
+        .gauge-background {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: -100%;
+            border-radius: 50%;
+            border: 12px solid theme('colors.surface-container-high');
+            border-bottom-color: transparent;
+        }
+        .gauge-fill-speed {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: -100%;
+            border-radius: 50%;
+            border: 12px solid theme('colors.secondary');
+            border-bottom-color: transparent;
+            transform: rotate(-135deg); /* Example 45% */
+            transition: transform 1s ease-out;
+        }
+        .gauge-fill-accel {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: -100%;
+            border-radius: 50%;
+            border: 12px solid theme('colors.primary');
+            border-bottom-color: transparent;
+            transform: rotate(-90deg); /* Example 50% */
+            transition: transform 1s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen font-body-lg flex flex-col pt-[48px] pb-[100px]">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-page h-touch-target-min bg-background/80 backdrop-blur-md">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: &quot;FILL&quot; 1;">directions_car</span>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tighter text-primary">PING</h1>
+<button class="flex items-center justify-center w-[48px] h-[48px] hover:opacity-80 transition-opacity active:scale-95 duration-100">
+<span class="material-symbols-outlined text-primary">sensors</span>
+</button>
+</header>
+<!-- Main Canvas -->
+<main class="flex-grow px-margin-page py-stack-lg flex flex-col gap-stack-lg overflow-y-auto">
+<!-- Top Row: Gauges -->
+<div class="grid grid-cols-2 gap-gutter-grid">
+<!-- Speed Gauge -->
+<div class="bg-surface-container-lowest p-stack-md rounded-xl shadow-[0_4px_12px_rgba(4,22,39,0.05)] border border-surface-container-highest flex flex-col items-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant mb-stack-sm">Velocidad</span>
+<div class="flex justify-center mb-2"><img src="https://lh3.googleusercontent.com/aida-public/AB6AXuD0653u421ov165enycvj-K5c6ndpbPnuJPhul8P-kYJSROkMhQISSkFW8ul8_dv1rX73Z3MxcltDbUPcBsWYbt5chyyyvEg9nw9AGl2QB9UpJ7_QrR6K81o7XU8GEYUI1ZY4RRnr9ZJ-7xMms6GMrwWuxnS-krPI6yGrPqoAoSmEZwS1cfAZkUSjby67X7rL58xrmeSu5DHp2YyumZDl9mlav-PYYQcpNG2lZJwOnskeBB-IJUkZyl" alt="Velocidad Gauge" class="h-24 w-auto object-contain"></div>
+<div class="mt-[-20px] text-center"><span class="font-status-number text-status-number text-on-background">45</span><span class="font-label-caps text-label-caps text-outline ml-1">km/h</span></div>
+</div>
+<!-- Acceleration Gauge -->
+<div class="bg-surface-container-lowest p-stack-md rounded-xl shadow-[0_4px_12px_rgba(4,22,39,0.05)] border border-surface-container-highest flex flex-col items-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant mb-stack-sm">Aceleración</span>
+<div class="flex justify-center mb-2"><img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBiikSfYeGLMxZE3bt7cnMQqWlqJX2A_XY0RMeIAH8pWMbnUkX2nIgraPgtVsoN15K_hKQCyowrWne7PGON_z8wWsG9PBHForPi5MCZD_f7DujB2PtDjbkzNbG7LW7NbjbLk-vRCdOQfKs09czTzO4tCQkC031mV9CfDwIrrF39-EHAhD0KE-pLp7eqyoSK3dCMei9X-aqbAyETqysd3lUVDNEoMWv-Oq9dpqR8GOMsKgzjSI9EDyem" alt="Aceleración Gauge" class="h-24 w-auto object-contain"></div>
+<div class="mt-[-20px] text-center"><span class="font-status-number text-status-number text-on-background">2.5</span><span class="font-label-caps text-label-caps text-outline ml-1">m/s²</span></div>
+</div>
+</div>
+<!-- Middle Row: Bars -->
+<div class="bg-surface-container-lowest p-stack-md rounded-xl shadow-[0_4px_12px_rgba(4,22,39,0.05)] border border-surface-container-highest flex flex-col gap-stack-md">
+<!-- Battery -->
+<div>
+<div class="flex justify-between items-center mb-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]" style="color: rgb(52, 199, 89);">battery_charging_full</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Batería</span>
+</div>
+<span class="font-status-number text-status-number text-on-background text-[14px]">85%</span>
+</div>
+<div class="h-2 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full rounded-full" style="width: 85%; background-color: #34C759;"></div>
+</div>
+</div>
+<!-- Fuel -->
+<div>
+<div class="flex justify-between items-center mb-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-secondary">local_gas_station</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Combustible</span>
+</div>
+<span class="font-status-number text-status-number text-on-background text-[14px]">60%</span>
+</div>
+<div class="h-2 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-secondary rounded-full" style="width: 60%;"></div>
+</div>
+</div>
+<!-- Temp -->
+<div>
+<div class="flex justify-between items-center mb-2">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-error">thermostat</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Temperatura</span>
+</div>
+<span class="font-status-number text-status-number text-on-background text-[14px]">75°C</span>
+</div>
+<div class="h-2 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full rounded-full bg-gradient-to-r from-secondary to-error" style="width: 75%;"></div>
+</div>
+</div>
+</div>
+<!-- Bottom Row: Odometer -->
+<div class="bg-surface-container-lowest p-stack-lg rounded-xl shadow-[0_4px_12px_rgba(4,22,39,0.05)] border border-surface-container-highest flex flex-col items-center justify-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant mb-2">Distancia Total</span>
+<div class="flex items-baseline gap-1">
+<span class="font-status-number text-[32px] leading-tight font-bold text-on-background tracking-wider">1,245.3</span>
+<span class="font-label-caps text-label-caps text-outline">km</span>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 pt-2 pb-safe-area-bottom bg-surface-container-lowest shadow-[0_-4px_12px_rgba(4,22,39,0.15)] rounded-t-xl md:hidden">
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined mb-1">home</span>
+<span class="font-label-caps text-label-caps">Inicio</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined mb-1">explore</span>
+<span class="font-label-caps text-label-caps">Navegación</span>
+</button>
+<!-- Active state: Telemetría -->
+<button class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 scale-95 transition-transform duration-200">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: &quot;FILL&quot; 1;">analytics</span>
+<span class="font-label-caps text-label-caps">Telemetría</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined mb-1">visibility</span>
+<span class="font-label-caps text-label-caps">Visión</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined mb-1">person</span>
+<span class="font-label-caps text-label-caps">Perfil</span>
+</button>
+</nav>
+<!-- Web Desktop Sidebar equivalent (hidden on md, visible md:flex) -->
+<nav class="hidden md:flex flex-col fixed top-[48px] left-0 w-64 h-[calc(100vh-48px)] bg-surface-container-lowest border-r border-surface-container-high p-4 gap-2">
+<button class="flex items-center gap-4 text-on-surface-variant p-3 rounded-lg hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-caps text-label-caps">Inicio</span>
+</button>
+<button class="flex items-center gap-4 text-on-surface-variant p-3 rounded-lg hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">explore</span>
+<span class="font-label-caps text-label-caps">Navegación</span>
+</button>
+<button class="flex items-center gap-4 bg-secondary-container text-on-secondary-container p-3 rounded-lg">
+<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1;">analytics</span>
+<span class="font-label-caps text-label-caps">Telemetría</span>
+</button>
+<button class="flex items-center gap-4 text-on-surface-variant p-3 rounded-lg hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">visibility</span>
+<span class="font-label-caps text-label-caps">Visión</span>
+</button>
+<button class="flex items-center gap-4 text-on-surface-variant p-3 rounded-lg hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-caps text-label-caps">Perfil</span>
+</button>
+</nav>
+
+
+</body></html>

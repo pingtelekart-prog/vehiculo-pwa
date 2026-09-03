@@ -1,0 +1,1914 @@
+<!DOCTYPE html>
+<html class="light" lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#041627">
+  <meta name="description" content="PING - Panel de control para vehículo autónomo">
+  <title>PING - Control de Vehículo Autónomo</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <!-- Material Symbols -->
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+    rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap"
+    rel="stylesheet">
+  <!-- Leaflet CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Tailwind Configuration -->
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "background": "#fbf9fa",
+            "on-background": "#1b1c1d",
+            "surface": "#fbf9fa",
+            "surface-dim": "#dbd9db",
+            "surface-bright": "#fbf9fa",
+            "surface-container-lowest": "#ffffff",
+            "surface-container-low": "#f5f3f4",
+            "surface-container": "#efedef",
+            "surface-container-high": "#e9e7e9",
+            "surface-container-highest": "#e4e2e3",
+            "surface-variant": "#e4e2e3",
+            "surface-tint": "#4f6073",
+            "on-surface": "#1b1c1d",
+            "on-surface-variant": "#44474c",
+            "inverse-surface": "#303032",
+            "inverse-on-surface": "#f2f0f2",
+            "outline": "#74777d",
+            "outline-variant": "#c4c6cd",
+            "primary": "#041627",
+            "on-primary": "#ffffff",
+            "primary-container": "#1a2b3c",
+            "on-primary-container": "#8192a7",
+            "primary-fixed": "#d2e4fb",
+            "primary-fixed-dim": "#b7c8de",
+            "on-primary-fixed": "#0b1d2d",
+            "on-primary-fixed-variant": "#38485a",
+            "inverse-primary": "#b7c8de",
+            "secondary": "#0058bc",
+            "on-secondary": "#ffffff",
+            "secondary-container": "#0070eb",
+            "on-secondary-container": "#fefcff",
+            "secondary-fixed": "#d8e2ff",
+            "secondary-fixed-dim": "#adc6ff",
+            "on-secondary-fixed": "#001a41",
+            "on-secondary-fixed-variant": "#004493",
+            "tertiary": "#211200",
+            "on-tertiary": "#ffffff",
+            "tertiary-container": "#38260b",
+            "on-tertiary-container": "#a88c69",
+            "tertiary-fixed": "#feddb5",
+            "tertiary-fixed-dim": "#e1c29b",
+            "on-tertiary-fixed": "#281802",
+            "on-tertiary-fixed-variant": "#584326",
+            "error": "#ba1a1a",
+            "on-error": "#ffffff",
+            "error-container": "#ffdad6",
+            "on-error-container": "#93000a",
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          spacing: {
+            "stack-sm": "8px",
+            "stack-md": "16px",
+            "stack-lg": "24px",
+            "margin-page": "20px",
+            "touch-target-min": "48px",
+            "gutter-grid": "16px",
+            "safe-area-bottom": "34px"
+          },
+          fontFamily: {
+            "body-lg": ["Inter"],
+            "body-sm": ["Inter"],
+            "headline-lg": ["Inter"],
+            "headline-lg-mobile": ["Inter"],
+            "headline-md": ["Inter"],
+            "label-caps": ["JetBrains Mono"],
+            "status-number": ["JetBrains Mono"]
+          },
+          fontSize: {
+            "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "700" }],
+            "headline-lg-mobile": ["24px", { lineHeight: "30px", letterSpacing: "-0.01em", fontWeight: "700" }],
+            "headline-md": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+            "body-lg": ["17px", { lineHeight: "24px", fontWeight: "400" }],
+            "body-sm": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+            "label-caps": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "600" }],
+            "status-number": ["18px", { lineHeight: "24px", fontWeight: "500" }]
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior-y: none;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    body::-webkit-scrollbar {
+      display: none;
+    }
+
+    .screen {
+      position: fixed;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      overflow-y: auto;
+    }
+
+    .screen.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.85);
+    }
+
+    .ambient-shadow {
+      box-shadow: 0 4px 12px rgba(4, 22, 39, 0.15);
+    }
+
+    .pulse-dot {
+      animation: pulse-green 2s infinite;
+    }
+
+    @keyframes pulse-green {
+      0% {
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4);
+      }
+
+      70% {
+        box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+      }
+    }
+
+    .e-stop-pulse {
+      animation: pulse-danger 2s infinite;
+    }
+
+    @keyframes pulse-danger {
+      0% {
+        box-shadow: 0 0 0 0 rgba(186, 26, 26, 0.4);
+      }
+
+      70% {
+        box-shadow: 0 0 0 15px rgba(186, 26, 26, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(186, 26, 26, 0);
+      }
+    }
+
+    .map-pattern {
+      background-image:
+        radial-gradient(#c4c6cd 1px, transparent 1px),
+        radial-gradient(#c4c6cd 1px, transparent 1px);
+      background-size: 40px 40px;
+      background-position: 0 0, 20px 20px;
+      opacity: 0.3;
+    }
+
+    .camera-crosshair {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 40px;
+      height: 40px;
+      pointer-events: none;
+    }
+
+    .camera-crosshair::before,
+    .camera-crosshair::after {
+      content: '';
+      position: absolute;
+      background-color: rgba(255, 255, 255, 0.6);
+    }
+
+    .camera-crosshair::before {
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+    }
+
+    .camera-crosshair::after {
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+    }
+
+    .toggle-checkbox:checked {
+      right: 0;
+      border-color: #041627;
+    }
+
+    .toggle-checkbox:checked+.toggle-label {
+      background-color: #041627;
+    }
+
+    .material-symbols-outlined.filled {
+      font-variation-settings: 'FILL' 1;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .error-slide-in {
+      animation: slideIn 0.25s ease forwards;
+    }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* ── Bottom Navigation Bar ──────────────────────────── */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      z-index: 9999;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 8px 8px env(safe-area-inset-bottom, 0px);
+      background: #ffffff;
+      box-shadow: 0 -4px 12px rgba(4, 22, 39, 0.15);
+      border-radius: 16px 16px 0 0;
+      /* Ensure nothing can block pointer events */
+      pointer-events: auto !important;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .bottom-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      min-height: 48px;
+      padding: 4px 8px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      border-radius: 12px;
+      color: #44474c;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      position: relative;
+      transition: background 0.15s ease, transform 0.1s ease;
+      /* Isolation from overlapping elements */
+      isolation: isolate;
+    }
+
+    .bottom-nav-item:active {
+      transform: scale(0.93);
+      background: rgba(4, 22, 39, 0.06);
+    }
+
+    .bottom-nav-item.active-tab {
+      background: #e8f0fe;
+      color: #0058bc;
+      border-radius: 24px;
+    }
+
+    .bottom-nav-item .nav-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+      margin-top: 2px;
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .bottom-nav-item .material-symbols-outlined {
+      font-size: 22px;
+      pointer-events: none;
+    }
+
+    /* ── Responsive Layout Fixes ────────────────────────── */
+
+    /* Screen content must not go under the fixed bottom nav */
+    .screen-scrollable {
+      padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px)) !important;
+    }
+
+    /* Telemetry grid: single column on small screens, 2 cols on md+ */
+    .tele-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    @media (min-width: 480px) {
+      .tele-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    /* Dashboard 2-col grid always, but cards shrink-friendly */
+    .dash-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 360px) {
+      .dash-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Prevent aspect-square overflow on very small screens */
+    @media (max-width: 360px) {
+      .dash-grid button {
+        aspect-ratio: auto;
+        padding: 16px;
+      }
+    }
+
+    /* Navigation module map: ensure nav bar doesn't overlap */
+    #bottom-sheet {
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 72px) !important;
+    }
+
+    /* Toast notification */
+    #map-toast {
+      position: fixed;
+      bottom: calc(80px + env(safe-area-inset-bottom, 0px) + 16px);
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      z-index: 99999;
+      background: #ba1a1a;
+      color: #ffffff;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 8px 24px rgba(186, 26, 26, 0.35);
+      max-width: calc(100vw - 48px);
+      text-align: center;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      line-height: 1.4;
+    }
+
+    #map-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+      pointer-events: auto;
+    }
+
+    /* Map loading overlay */
+    #map-validating-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 9000;
+      background: rgba(4, 22, 39, 0.75);
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      backdrop-filter: blur(4px);
+    }
+  </style>
+</head>
+
+<body class="bg-background text-on-background font-body-lg antialiased">
+
+  <!-- MODULE 0: LOGIN -->
+  <div id="screen-login" class="screen active bg-background">
+    <div
+      class="fixed top-0 left-0 w-full h-96 bg-gradient-to-b from-primary-fixed/20 to-transparent pointer-events-none -z-10">
+    </div>
+    <div
+      class="fixed -top-24 -right-24 w-96 h-96 bg-secondary-container/5 rounded-full blur-3xl pointer-events-none -z-10">
+    </div>
+
+    <main class="w-full max-w-md px-margin-page py-stack-lg flex flex-col min-h-[100dvh] mx-auto relative z-10">
+      <div class="flex-1"></div>
+      <header class="flex flex-col items-center text-center mb-10">
+        <div
+          class="w-48 h-24 mb-stack-lg rounded-2xl overflow-hidden shadow-[0_4px_24px_rgba(4,22,39,0.12)] border border-outline-variant/30 bg-surface">
+          <img alt="Ping Logo" class="w-full h-full object-contain bg-surface"
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAb6CfssZ6n8tLaTm3kLUwwwbuVd2piiNU12m9CmmzDRL3WGhr_lfk0Jgo7KsR8KgZD3KZZRp8GNbQ7MEYQFLjmrVTrzJVzD8uCnlranIwgOJ5geTe7SbGVDvcBcNkyxJQcZz-B2DwTgkEQMps967vt_7Ppx1qdSeYqoy0AZ7Nxoik1EfR3YItoNHa73L5c-CkmPpr9KRo7uJNav4YMgunHbaVwz_KBdBbMHY9pBIrCN9aVhEEqlt3l-ibOXXvmVuj1UMuyLOb1CNbELw">
+        </div>
+        <h1 class="font-headline-lg-mobile text-headline-lg-mobile text-primary mb-2">Bienvenido a Ping</h1>
+        <p class="font-body-lg text-body-lg text-on-surface-variant max-w-[280px]">Ingresa el identificador de tu
+          vehículo para comenzar</p>
+      </header>
+
+      <div class="glass-panel rounded-2xl p-stack-lg ambient-shadow w-full">
+        <form id="login-form" class="flex flex-col gap-stack-lg" autocomplete="off">
+          <div class="flex flex-col gap-2">
+            <label class="font-label-caps text-label-caps text-on-surface-variant uppercase ml-2" for="vehicle_id">ID
+              del Vehículo</label>
+            <div class="relative group">
+              <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <span class="material-symbols-outlined text-outline group-focus-within:text-primary transition-colors"
+                  style="font-variation-settings:'FILL' 0">directions_car</span>
+              </div>
+              <input id="vehicle_id" name="vehicle_id" type="text" placeholder="Ej: PING-01" autocomplete="off"
+                class="w-full h-[56px] pl-12 pr-4 bg-surface-container-highest border border-outline-variant/50 rounded-xl font-status-number text-status-number text-on-background placeholder:text-outline/70 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all hover:bg-surface-container shadow-inner uppercase">
+            </div>
+            <div id="login-error"
+              class="hidden items-center gap-2 px-3 py-2 bg-error-container/60 border border-error/30 rounded-xl">
+              <span class="material-symbols-outlined text-error text-[18px]"
+                style="font-variation-settings:'FILL' 1">error</span>
+              <span class="font-body-sm text-body-sm text-on-error-container" id="login-error-text">ID de vehículo no
+                encontrado</span>
+            </div>
+          </div>
+
+          <button id="connect-btn" type="submit"
+            class="w-full h-[56px] bg-primary-container text-on-primary rounded-xl font-headline-md text-headline-md shadow-[0_4px_12px_rgba(26,43,60,0.25)] flex items-center justify-center gap-2 hover:bg-primary active:scale-[0.98] transition-all duration-200 group mt-2">
+            <span id="btn-label">Conectar Vehículo</span>
+            <span id="btn-spinner" class="spinner hidden"></span>
+            <span id="btn-icon" class="material-symbols-outlined group-hover:translate-x-1 transition-transform"
+              style="font-variation-settings:'FILL' 1">arrow_forward</span>
+          </button>
+        </form>
+      </div>
+
+      <div class="flex-1"></div>
+      <footer class="mt-auto pt-8 pb-safe-area-bottom w-full text-center">
+        <a class="font-body-sm text-body-sm text-secondary font-medium hover:text-primary transition-colors inline-flex items-center gap-1"
+          href="#">
+          <span class="material-symbols-outlined text-[16px]">help</span>
+          Necesitas ayuda para encontrar tu ID?
+        </a>
+      </footer>
+    </main>
+  </div>
+
+  <!-- MODULE 1: DASHBOARD -->
+  <div id="screen-dashboard" class="screen bg-background">
+    <header
+      class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-page h-touch-target-min bg-background/80 backdrop-blur-md border-b border-outline-variant/20">
+      <div class="flex items-center gap-2">
+        <img alt="Ping Logo" class="w-10 h-10 object-contain"
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuAwSLpaLCGJot06yox5saaFWrDSHqAs_DTNp2ylw-DqhafVJXv0GzyEJmRpgiDSAMDOs4cSm7fmqMSyH-VZyl0yb3NNwsyquliqoXhkHpSfR7t6aTPo2Ii4rNDEvNHELuWpLGeh-Sag32u7AZNclxSW70MLOWeV17WxZfMqwd_Y_-O4yeadvJSUwXlDxFk-9BTno3P-S7ZlJI3RxFtbEtNYpCeo5QmviE8zcph0LjVJZb18e_ii0O3n2LT7YajrjK7CgmwekSbJkJVnRw">
+        <h1 class="font-headline-md text-headline-md font-bold tracking-tighter text-primary">PING</h1>
+      </div>
+      <button id="header-disconnect-btn" title="Desconectar vehículo"
+        class="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-error/30 text-error bg-error-container/20 hover:bg-error-container/50 active:scale-95 transition-all duration-150 font-label-caps text-label-caps">
+        <span class="material-symbols-outlined text-[16px]" style="font-variation-settings:'FILL' 0">link_off</span>
+        <span class="hidden sm:inline">Desconectar</span>
+      </button>
+    </header>
+
+    <main
+      class="px-margin-page pt-[calc(48px+20px)] max-w-2xl mx-auto w-full flex flex-col gap-stack-lg min-h-screen screen-scrollable">
+      <!-- Status Card -->
+      <section
+        class="bg-surface-container-lowest border border-surface-container-highest rounded-xl p-5 ambient-shadow flex items-center justify-between">
+        <div>
+          <h2 class="font-body-sm text-body-sm text-on-surface-variant mb-1">Estado Global</h2>
+          <div class="flex items-center gap-2">
+            <div class="w-2.5 h-2.5 rounded-full bg-[#22c55e] pulse-dot flex-shrink-0"></div>
+            <span id="status-label" class="font-headline-md text-headline-md text-on-background">En linea</span>
+          </div>
+          <p id="status-vehicle-id"
+            class="font-label-caps text-label-caps text-on-surface-variant mt-1 ml-4 tracking-widest"></p>
+        </div>
+        <button id="card-engine-btn" title="Encender Motor"
+          class="flex flex-col items-center gap-0.5 p-2 rounded-xl text-primary hover:bg-primary-container/30 active:scale-95 transition-all duration-150">
+          <span id="card-engine-icon" class="material-symbols-outlined text-[20px]"
+            style="font-variation-settings:'FILL' 0">power_settings_new</span>
+          <span id="card-engine-text"
+            class="font-label-caps text-[10px] leading-none text-center max-w-[50px]">ENCENDER<br>MOTOR</span>
+        </button>
+      </section>
+
+      <!-- Grid -->
+      <section class="dash-grid flex-1 content-start">
+        <button data-nav="navegacion" id="nav-module-btn"
+          class="bottom-nav-btn bg-surface-container-lowest border border-surface-container-highest rounded-xl p-5 flex flex-col items-center justify-center gap-stack-md aspect-square ambient-shadow hover:bg-surface-container-low transition-colors active:scale-[0.98] duration-150 opacity-50 pointer-events-none relative overflow-hidden">
+          <div class="absolute inset-0 bg-surface/50 z-10" id="nav-lock-overlay">
+            <span class="material-symbols-outlined absolute top-2 right-2 text-outline-variant text-[20px]">lock</span>
+          </div>
+          <div class="w-16 h-16 rounded-full bg-secondary-container/10 flex items-center justify-center text-secondary">
+            <span class="material-symbols-outlined text-[32px]" style="font-variation-settings:'FILL' 1">explore</span>
+          </div>
+          <span class="font-headline-md text-[18px] leading-snug text-primary">Navegacion</span>
+        </button>
+        <button data-nav="telemetria"
+          class="bottom-nav-btn bg-surface-container-lowest border border-surface-container-highest rounded-xl p-5 flex flex-col items-center justify-center gap-stack-md aspect-square ambient-shadow hover:bg-surface-container-low transition-colors active:scale-[0.98] duration-150">
+          <div class="w-16 h-16 rounded-full bg-secondary-container/10 flex items-center justify-center text-secondary">
+            <span class="material-symbols-outlined text-[32px]"
+              style="font-variation-settings:'FILL' 1">analytics</span>
+          </div>
+          <span class="font-headline-md text-[18px] leading-snug text-primary">Telemetria</span>
+        </button>
+        <button data-nav="vision"
+          class="bottom-nav-btn bg-surface-container-lowest border border-surface-container-highest rounded-xl p-5 flex flex-col items-center justify-center gap-stack-md aspect-square ambient-shadow hover:bg-surface-container-low transition-colors active:scale-[0.98] duration-150">
+          <div class="w-16 h-16 rounded-full bg-secondary-container/10 flex items-center justify-center text-secondary">
+            <span class="material-symbols-outlined text-[32px]"
+              style="font-variation-settings:'FILL' 1">visibility</span>
+          </div>
+          <span class="font-headline-md text-[18px] leading-snug text-primary">Vision</span>
+        </button>
+        <button data-nav="perfil"
+          class="bottom-nav-btn bg-surface-container-lowest border border-surface-container-highest rounded-xl p-5 flex flex-col items-center justify-center gap-stack-md aspect-square ambient-shadow hover:bg-surface-container-low transition-colors active:scale-[0.98] duration-150">
+          <div class="w-16 h-16 rounded-full bg-secondary-container/10 flex items-center justify-center text-secondary">
+            <span class="material-symbols-outlined text-[32px]" style="font-variation-settings:'FILL' 1">person</span>
+          </div>
+          <span class="font-headline-md text-[18px] leading-snug text-primary">Mi Perfil</span>
+        </button>
+      </section>
+
+      <div class="mt-auto pt-stack-lg flex justify-center pb-2">
+        <div class="h-1 w-1/3 bg-outline-variant/30 rounded-full"></div>
+      </div>
+    </main>
+
+    <nav class="bottom-nav" id="nav-dashboard" aria-label="Navegación principal">
+      <button class="bottom-nav-item active-tab" data-nav="dashboard" type="button">
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">home</span>
+        <span class="nav-label">Inicio</span>
+      </button>
+      <button class="bottom-nav-item" data-nav="navegacion" type="button">
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0">explore</span>
+        <span class="nav-label">Navegacion</span>
+      </button>
+      <button class="bottom-nav-item" data-nav="telemetria" type="button">
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0">analytics</span>
+        <span class="nav-label">Telemetria</span>
+      </button>
+      <button class="bottom-nav-item" data-nav="vision" type="button">
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0">visibility</span>
+        <span class="nav-label">Vision</span>
+      </button>
+      <button class="bottom-nav-item" data-nav="perfil" type="button">
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0">person</span>
+        <span class="nav-label">Perfil</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Toast notification (shared, lives outside screens) -->
+  <div id="map-toast" role="alert" aria-live="assertive">
+    <span class="material-symbols-outlined" style="font-size:18px;flex-shrink:0;">block</span>
+    <span id="map-toast-text">Destino inválido: Por favor, selecciona una calle transitable para el vehículo.</span>
+  </div>
+
+  <!-- MODULE 2: NAVEGACION -->
+  <div id="screen-navegacion" class="screen bg-background flex flex-col h-screen overflow-hidden relative">
+    <main class="absolute inset-0 w-full h-full" id="map-parent">
+      <!-- Leaflet Map Container -->
+      <div id="ping-map" class="absolute inset-0 w-full h-full z-0"
+        style="filter: invert(90%) hue-rotate(180deg) brightness(120%) contrast(105%);"></div>
+      <div class="absolute inset-0 map-pattern pointer-events-none z-10 opacity-30"></div>
+
+      <!-- Validating overlay -->
+      <div id="map-validating-overlay">
+        <span class="spinner" style="border-top-color:#fff;"></span>
+        Validando destino...
+      </div>
+
+      <div
+        class="absolute top-4 left-4 flex items-center gap-2 bg-surface-container-lowest/90 backdrop-blur-sm px-3 py-1.5 rounded-full shadow-sm border border-outline-variant/30 z-20">
+        <div class="w-2 h-2 rounded-full bg-[#22c55e] pulse-dot"></div>
+        <span id="nav-vehicle-chip" class="font-label-caps text-label-caps text-primary"></span>
+      </div>
+      <div class="absolute top-4 right-4 z-20">
+        <button id="btn-prev-dest-float"
+          class="bg-surface-container-lowest text-on-surface flex items-center gap-2 px-4 py-2 rounded-full shadow-sm hover:bg-surface-container-high transition-colors min-h-[48px]">
+          <span class="material-symbols-outlined text-[20px]">history</span>
+          <span class="font-label-caps text-label-caps">Destinos</span>
+        </button>
+      </div>
+    </main>
+
+    <div id="bottom-sheet"
+      class="absolute left-0 w-full bg-surface-container-lowest rounded-t-3xl shadow-[0_-8px_24px_rgba(4,22,39,0.2)] z-30 flex flex-col transition-transform duration-300 transform translate-y-[calc(100%-48px)]">
+      <div id="bottom-sheet-handle" class="flex justify-center pt-3 pb-4 cursor-pointer"
+        style="touch-action:manipulation;">
+        <div class="w-12 h-1.5 bg-outline-variant rounded-full"></div>
+      </div>
+      <div class="px-margin-page flex-1 flex flex-col justify-center pb-6">
+        <h2
+          class="font-headline-lg-mobile text-headline-lg-mobile text-primary mb-stack-md flex justify-between items-center pointer-events-none">
+          Destino
+          <span id="bottom-sheet-icon"
+            class="material-symbols-outlined text-outline-variant text-sm transition-transform duration-300">expand_less</span>
+        </h2>
+        <div class="flex flex-col gap-stack-sm w-full">
+          <button id="btn-select-route"
+            class="w-full bg-surface-container-high text-on-surface-variant font-label-caps text-label-caps h-[56px] rounded-xl flex items-center justify-center gap-2 hover:bg-surface-variant transition-colors shadow-sm">
+            <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0">search</span>
+            <span id="select-route-text">Seleccionar Ruta</span>
+          </button>
+          <button id="btn-start-route"
+            class="w-full bg-surface-container text-outline font-headline-md text-headline-md h-[56px] rounded-xl flex items-center justify-center gap-2 cursor-not-allowed opacity-70 transition-all duration-300">
+            <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0">route</span>
+            Iniciar Ruta
+          </button>
+          <button id="btn-locate-me"
+            class="w-full bg-surface-container-high text-on-surface-variant font-label-caps text-label-caps h-[56px] rounded-xl flex items-center justify-center gap-2 hover:bg-surface-variant transition-colors shadow-sm">
+            <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0">person_pin_circle</span>
+            Búscame
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <nav class="bottom-nav" id="nav-navegacion" aria-label="Navegación principal">
+      <button class="bottom-nav-item" data-nav="dashboard" type="button">
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0">home</span>
+        <span class="nav-label">Inicio</span>
+      </button>
+      <button class="bottom-nav-item active-tab" data-nav="navegacion" type="button">
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">explore</span>
+        <span class="nav-label">Navegacion</span>
+      </button>
+      <button class="bottom-nav-item" data-nav="telemetria" type="button">
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0">analytics</span>
+        <span class="nav-label">Telemetria</span>
+      </button>
+      <button class="bottom-nav-item" data-nav="vision" type="button">
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0">visibility</span>
+        <span class="nav-label">Vision</span>
+      </button>
+      <button class="bottom-nav-item" data-nav="perfil" type="button">
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0">person</span>
+        <span class="nav-label">Perfil</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- MODULE 3: TELEMETRIA -->
+  <div id="screen-telemetria" class="screen bg-background">
+    <header
+      class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-page h-touch-target-min bg-background/80 backdrop-blur-md border-b border-outline-variant/20">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary"
+          style="font-variation-settings:'FILL' 1">directions_car</span>
+        <h1 class="font-headline-md text-headline-md font-bold tracking-tighter text-primary">PING</h1>
+      </div>
+      <span id="tele-vehicle-id" class="font-label-caps text-label-caps text-on-surface-variant tracking-widest"></span>
+      <button
+        class="flex items-center justify-center w-[48px] h-[48px] hover:opacity-80 transition-opacity active:scale-95">
+        <span class="material-symbols-outlined text-primary">sensors</span>
+      </button>
+    </header>
+
+    <main
+      class="px-margin-page pt-[calc(48px+20px)] max-w-2xl mx-auto w-full flex flex-col gap-stack-lg min-h-screen screen-scrollable">
+      <div class="tele-grid">
+        <!-- Speed Gauge -->
+        <div
+          class="bg-surface-container-lowest p-stack-md rounded-xl shadow-[0_4px_12px_rgba(4,22,39,0.05)] border border-surface-container-highest flex flex-col items-center">
+          <span
+            class="font-label-caps text-label-caps text-on-background font-bold text-[16px] tracking-wider drop-shadow-sm z-10 relative">Velocidad</span>
+          <div class="relative w-full max-w-[160px] mb-2 aspect-[2/1] mt-6">
+            <svg viewBox="-15 -15 130 80" class="w-full h-full">
+              <defs>
+                <linearGradient id="speedGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#38bdf8" />
+                  <stop offset="100%" stop-color="#0284c7" />
+                </linearGradient>
+              </defs>
+              <path d="M 0 50 A 50 50 0 0 1 100 50" fill="none" class="stroke-surface-container-high" stroke-width="16"
+                stroke-linecap="round" />
+              <path id="tele-speed-gauge" d="M 0 50 A 50 50 0 0 1 100 50" fill="none" stroke="url(#speedGradient)"
+                class="transition-all duration-300 ease-out" stroke-width="16" stroke-linecap="round"
+                stroke-dasharray="157.1" stroke-dashoffset="157.1" />
+            </svg>
+          </div>
+          <div class="mt-[-24px] text-center z-10">
+            <span id="tele-speed-val" class="font-status-number text-on-background font-bold text-[24px]">0</span>
+            <span class="font-label-caps text-label-caps text-outline ml-1 font-medium">km/h</span>
+          </div>
+        </div>
+        <!-- Acceleration Gauge -->
+        <div
+          class="bg-surface-container-lowest p-stack-md rounded-xl shadow-[0_4px_12px_rgba(4,22,39,0.05)] border border-surface-container-highest flex flex-col items-center">
+          <span
+            class="font-label-caps text-label-caps text-on-background font-bold text-[16px] tracking-wider drop-shadow-sm z-10 relative">Aceleración</span>
+          <div class="relative w-full max-w-[160px] mb-2 aspect-[2/1] mt-6">
+            <svg viewBox="-15 -15 130 80" class="w-full h-full">
+              <defs>
+                <linearGradient id="accelGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#fb923c" />
+                  <stop offset="100%" stop-color="#dc2626" />
+                </linearGradient>
+              </defs>
+              <path d="M 0 50 A 50 50 0 0 1 100 50" fill="none" class="stroke-surface-container-high" stroke-width="16"
+                stroke-linecap="round" />
+              <path id="tele-accel-gauge" d="M 0 50 A 50 50 0 0 1 100 50" fill="none" stroke="url(#accelGradient)"
+                class="transition-all duration-300 ease-out" stroke-width="16" stroke-linecap="round"
+                stroke-dasharray="157.1" stroke-dashoffset="157.1" />
+            </svg>
+          </div>
+          <div class="mt-[-24px] text-center z-10">
+            <span id="tele-accel-val" class="font-status-number text-on-background font-bold text-[24px]">0.0</span>
+            <span class="font-label-caps text-label-caps text-outline ml-1 font-medium">m/s²</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Power & Engine State -->
+      <div
+        class="bg-surface-container-lowest p-stack-md rounded-xl shadow-[0_4px_12px_rgba(4,22,39,0.05)] border border-surface-container-highest flex flex-col gap-stack-md">
+        <!-- Battery -->
+        <div>
+          <div class="flex justify-between items-center mb-2">
+            <div class="flex items-center gap-2">
+              <span id="tele-batt-icon"
+                class="material-symbols-outlined text-[20px] text-[#34C759]">battery_charging_full</span>
+              <span class="font-label-caps text-label-caps text-on-surface-variant">Bateria</span>
+            </div>
+            <span id="tele-batt-val" class="font-status-number text-on-background text-[14px]">0%</span>
+          </div>
+          <div class="h-3 w-full bg-surface-container-high rounded-full overflow-hidden shadow-inner">
+            <div id="tele-batt-bar" class="h-full rounded-full transition-all duration-500 ease-linear"
+              style="width:0%; background-color:#FF3B30"></div>
+          </div>
+        </div>
+        <!-- Fuel -->
+        <div>
+          <div class="flex justify-between items-center mb-2">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[20px] text-secondary">local_gas_station</span>
+              <span class="font-label-caps text-label-caps text-on-surface-variant">Combustible</span>
+            </div>
+            <span id="tele-fuel-val" class="font-status-number text-on-background text-[14px]">0%</span>
+          </div>
+          <div class="h-3 w-full bg-surface-container-high rounded-full overflow-hidden shadow-inner">
+            <div id="tele-fuel-bar" class="h-full bg-secondary rounded-full transition-all duration-500 ease-linear"
+              style="width:0%"></div>
+          </div>
+        </div>
+        <!-- Temperature -->
+        <div>
+          <div class="flex justify-between items-center mb-2">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[20px] text-error">thermostat</span>
+              <span class="font-label-caps text-label-caps text-on-surface-variant">Temperatura</span>
+            </div>
+            <span id="tele-temp-val" class="font-status-number text-on-background text-[14px]">20°C</span>
+          </div>
+          <div class="h-3 w-full bg-surface-container-high rounded-full overflow-hidden shadow-inner relative">
+            <!-- Fixed gradient background -->
+            <div class="absolute inset-0 bg-gradient-to-r from-secondary via-[#FFCC00] to-error"></div>
+            <!-- Mask that shrinks to reveal gradient -->
+            <div id="tele-temp-mask"
+              class="absolute top-0 right-0 h-full bg-surface-container-high transition-all duration-500 ease-linear"
+              style="width: 100%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Odometry -->
+      <div
+        class="bg-surface-container-lowest p-stack-lg rounded-xl shadow-[0_4px_12px_rgba(4,22,39,0.05)] border border-surface-container-highest flex flex-col items-center justify-center">
+        <span class="font-label-caps text-label-caps text-on-surface-variant mb-2">Distancia Total</span>
+        <div
+          class="flex items-baseline gap-1 bg-surface-container px-6 py-2 rounded-lg shadow-inner border border-surface-container-highest">
+          <span id="tele-distance-val"
+            class="font-['JetBrains_Mono'] text-[32px] leading-tight font-bold text-on-background tracking-widest tabular-nums">0000.0</span>
+          <span class="font-label-caps text-label-caps text-outline ml-2">km</span>
+        </div>
+      </div>
+    </main>
+
+    <nav class="bottom-nav" id="nav-telemetria" aria-label="Navegación principal">
+      <button class="bottom-nav-item" data-nav="dashboard" type="button">
+        <span class="material-symbols-outlined">home</span>
+        <span class="nav-label">Inicio</span>
+      </button>
+      <button class="bottom-nav-item" data-nav="navegacion" type="button">
+        <span class="material-symbols-outlined">explore</span>
+        <span class="nav-label">Navegacion</span>
+      </button>
+      <button class="bottom-nav-item active-tab" data-nav="telemetria" type="button">
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">analytics</span>
+        <span class="nav-label">Telemetria</span>
+      </button>
+      <button class="bottom-nav-item" data-nav="vision" type="button">
+        <span class="material-symbols-outlined">visibility</span>
+        <span class="nav-label">Vision</span>
+      </button>
+      <button class="bottom-nav-item" data-nav="perfil" type="button">
+        <span class="material-symbols-outlined">person</span>
+        <span class="nav-label">Perfil</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- MODULE 4: VISION -->
+  <div id="screen-vision" class="screen bg-background">
+    <header
+      class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-page h-touch-target-min bg-background/80 backdrop-blur-md border-b border-outline-variant/20">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden">
+          <span class="material-symbols-outlined text-primary text-[20px]">robot_2</span>
+        </div>
+        <h1 class="font-headline-md text-headline-md font-bold tracking-tighter text-primary">PING</h1>
+      </div>
+      <button
+        class="w-touch-target-min h-touch-target-min flex items-center justify-center text-outline hover:opacity-80 transition-opacity active:scale-95 rounded-full">
+        <span class="material-symbols-outlined">sensors</span>
+      </button>
+    </header>
+
+    <main
+      class="flex-grow flex flex-col px-margin-page gap-stack-lg max-w-3xl mx-auto w-full pt-[calc(48px+16px)] min-h-screen screen-scrollable">
+      <div class="flex flex-col gap-stack-sm">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-error animate-pulse"></span>
+          <span class="font-label-caps text-label-caps text-error">Live feed</span>
+        </div>
+        <h2 class="font-headline-lg-mobile text-headline-lg-mobile text-primary">Vision de Camara</h2>
+        <p class="font-body-sm text-body-sm text-on-surface-variant">Transmision en tiempo real del sensor optico.</p>
+      </div>
+
+      <div
+        class="relative w-full aspect-video bg-gray-900 rounded-xl overflow-hidden shadow-sm border border-outline-variant flex flex-col">
+        <!-- Contenedor sin señal -->
+        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-10">
+          <span class="text-gray-500 font-headline-lg text-4xl tracking-widest uppercase">NO DATA</span>
+          <span id="bbox-status"
+            class="text-gray-400 font-label-caps text-sm mt-2 opacity-0 transition-opacity duration-300">Cajas
+            Delimitadoras Activadas</span>
+        </div>
+
+        <div class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 pointer-events-none">
+        </div>
+
+        <!-- Esquina Izquierda: FPS -->
+        <div class="absolute top-4 left-4 flex flex-col gap-1 z-20">
+          <div class="bg-black/60 backdrop-blur-sm rounded px-2 py-1 flex items-center gap-2 border border-white/10">
+            <span class="font-label-caps text-[10px] text-white/70">FPS</span>
+            <span class="font-status-number text-status-number font-bold text-white" id="fps-counter">30</span>
+          </div>
+        </div>
+
+        <!-- Esquina Derecha: Latencia y REC -->
+        <div class="absolute top-4 right-4 flex flex-col gap-1 items-end z-20">
+          <div class="bg-black/60 backdrop-blur-sm rounded px-2 py-1 flex items-center gap-2 border border-white/10">
+            <span class="font-label-caps text-[10px] text-white/70">LATENCIA</span>
+            <span class="font-status-number text-[14px] text-white font-medium" id="latency-counter">45ms</span>
+          </div>
+          <div class="bg-black/60 backdrop-blur-sm rounded px-2 py-1 flex items-center gap-1.5 border border-white/10">
+            <span class="material-symbols-outlined text-white/70 text-[14px]">videocam</span>
+            <span class="font-label-caps text-[10px] text-white">REC</span>
+          </div>
+        </div>
+
+        <div class="camera-crosshair z-20"></div>
+
+        <div
+          class="absolute inset-0 transition-opacity duration-300 pointer-events-none mix-blend-overlay opacity-0 z-20"
+          id="processing-overlay">
+          <div class="w-full h-full"
+            style="background-image:radial-gradient(rgba(0,255,0,0.2) 1px,transparent 1px);background-size:20px 20px;">
+          </div>
+          <div
+            class="absolute top-[30%] left-[40%] w-[120px] h-[80px] border-2 border-[#00FF00] bg-[rgba(0,255,0,0.1)]">
+            <span
+              class="absolute -top-5 left-0 bg-[#00FF00] text-black font-label-caps text-[10px] px-1 font-bold">VEHICLE
+              98%</span>
+          </div>
+        </div>
+
+        <div class="absolute bottom-4 left-4 right-4 flex justify-between items-end z-20">
+          <div class="flex flex-col gap-1">
+            <span class="font-label-caps text-[10px] text-white/70">SENSOR ID</span>
+            <span class="font-label-caps text-[12px] text-white">OPT-CAM-01-FWD</span>
+          </div>
+          <button
+            class="w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white hover:bg-black/70 active:scale-95 transition-all">
+            <span class="material-symbols-outlined text-[18px]">screenshot</span>
+          </button>
+        </div>
+      </div>
+
+      <div
+        class="flex flex-col gap-stack-md bg-surface-container-lowest rounded-xl p-5 shadow-[0_4px_12px_rgba(4,22,39,0.05)] border border-surface-container-highest">
+        <div class="flex items-center justify-between">
+          <div class="flex flex-col">
+            <span class="font-body-lg text-body-lg text-on-surface font-medium">Modo de Vision</span>
+            <span class="font-body-sm text-body-sm text-on-surface-variant" id="toggle-desc">Vista Cruda (RGB)</span>
+          </div>
+          <div class="relative inline-block w-14 mr-2 align-middle select-none">
+            <input
+              class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 border-outline appearance-none cursor-pointer z-10 top-0 left-0 transition-all duration-300"
+              id="vision-toggle" type="checkbox">
+            <label
+              class="toggle-label block overflow-hidden h-7 rounded-full bg-surface-container-highest cursor-pointer border border-outline-variant transition-colors duration-300"
+              for="vision-toggle"></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-auto pb-4">
+        <button id="btn-estop"
+          class="w-full h-[80px] bg-error hover:bg-[#93000a] text-on-error rounded-xl font-headline-md text-headline-md font-bold tracking-widest uppercase flex items-center justify-center gap-3 shadow-[0_8px_16px_rgba(186,26,26,0.3)] active:scale-[0.98] transition-all duration-150 e-stop-pulse p-4">
+          <span class="material-symbols-outlined text-[32px] filled">warning</span>
+          🛑 E-STOP / DETENER VEHÍCULO
+        </button>
+        <p class="text-center font-label-caps text-[10px] text-on-surface-variant mt-3 opacity-70">Corte inmediato de la
+          ruta y activacion de frenos.</p>
+      </div>
+    </main>
+
+    <nav class="bottom-nav" id="nav-vision" aria-label="Navegación principal">
+      <button class="bottom-nav-item" data-nav="dashboard" type="button">
+        <span class="material-symbols-outlined">home</span>
+        <span class="nav-label">Inicio</span>
+      </button>
+      <button class="bottom-nav-item" data-nav="navegacion" type="button">
+        <span class="material-symbols-outlined">explore</span>
+        <span class="nav-label">Navegacion</span>
+      </button>
+      <button class="bottom-nav-item" data-nav="telemetria" type="button">
+        <span class="material-symbols-outlined">analytics</span>
+        <span class="nav-label">Telemetria</span>
+      </button>
+      <button class="bottom-nav-item active-tab" data-nav="vision" type="button">
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">visibility</span>
+        <span class="nav-label">Vision</span>
+      </button>
+      <button class="bottom-nav-item" data-nav="perfil" type="button">
+        <span class="material-symbols-outlined">person</span>
+        <span class="nav-label">Perfil</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- MODULE 5: PERFIL -->
+  <div id="screen-perfil" class="screen bg-background">
+    <header
+      class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-page h-touch-target-min bg-background/80 backdrop-blur-md border-b border-outline-variant/20">
+      <div class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 border border-outline-variant/30">
+        <img class="w-full h-full object-cover"
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuA12o4VuUpR4FcIKWO57Z4DJ6Nhdfeh1bvUVX8oZPQVUEHgNN7d9oeqs32gcYZbXQpLsJSt-49DnExLH7rNqmHo4pxeji_1KMa59oCSo5HxIKBnUYc-RjJtJvFX2RQ8HcCcRAGG_jCb78DRVHFdXmzCxLBPyHkPzV0_esA3NVviBszuxtM9StqHSLmlQU4eyVjR-B9rmOJn5PTkV_bvJrsjZ1c9GJFGfZNKr4FK23Uj9Ot1JvhkaPwu"
+          alt="Avatar">
+      </div>
+      <h1 class="font-headline-md text-headline-md font-bold tracking-tighter text-primary">PING</h1>
+      <button
+        class="flex-shrink-0 w-8 h-8 flex items-center justify-center text-primary hover:opacity-80 transition-opacity active:scale-95">
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0">sensors</span>
+      </button>
+    </header>
+
+    <main
+      class="pt-[calc(48px+20px)] px-margin-page flex flex-col gap-stack-lg max-w-md mx-auto w-full min-h-screen screen-scrollable">
+      <section class="flex flex-col items-center gap-stack-sm pt-4 mt-8">
+        <label for="avatar-upload" class="relative group cursor-pointer block">
+          <div
+            class="w-24 h-24 rounded-full overflow-hidden border-4 border-surface-container-lowest shadow-[0_4px_12px_rgba(4,22,39,0.08)] bg-surface-container relative">
+            <img id="profile-avatar-img"
+              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 group-hover:opacity-75"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5hSJYFPVH7tmj172T-20gJOFPzGmjJIpe-YrD7QRQwjqhfyzhVXAYpg5UAByoK02yGt77ftmlmlQ338w14xcjhFFs0TWKHzxfE4aAHDUfiNWqLl7Ghbr03PmI6bpDDbWH6dmLe2icXBhlqYBiiveS6Pb4V_tAL1X8-P3TbyuOqNVrZhHLX-clGZLC4t1wzL4fV0gsApf08wJ8jroSZxbQRU6Ffi3k8eeEgLu5HHir618AK62-0Pgq"
+              alt="Profile">
+            <div
+              class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white bg-black/30">
+              <span class="material-symbols-outlined text-[32px]">photo_camera</span>
+            </div>
+          </div>
+          <div
+            class="absolute bottom-1 right-1 w-5 h-5 bg-[#34C759] rounded-full border-2 border-surface-container-lowest shadow-sm z-10">
+          </div>
+        </label>
+        <input type="file" id="avatar-upload" accept="image/*" class="hidden" />
+        <div class="text-center mt-2">
+          <h2 id="profile-display-name" class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Piloto
+            Demo</h2>
+        </div>
+      </section>
+
+      <section class="flex flex-col gap-stack-md mt-4">
+        <h3 class="font-label-caps text-label-caps text-outline ml-1">INFORMACION OPERATIVA</h3>
+        <div
+          class="bg-surface-container-lowest rounded-xl p-4 flex flex-col gap-1 border border-surface-container-high shadow-[0_2px_8px_rgba(4,22,39,0.04)]">
+          <label class="font-label-caps text-label-caps text-outline">Nombre Completo</label>
+          <div class="flex items-center mt-1">
+            <span class="material-symbols-outlined text-on-surface-variant mr-3 text-[20px]">badge</span>
+            <input id="input-full-name"
+              class="bg-transparent border-none p-0 flex-1 font-body-lg text-body-lg text-on-surface focus:ring-0 focus:outline-none focus:border-b focus:border-primary transition-all"
+              type="text" value="Piloto Demo">
+          </div>
+        </div>
+        <div
+          class="bg-surface-container-lowest rounded-xl p-4 flex flex-col gap-1 border border-surface-container-high shadow-[0_2px_8px_rgba(4,22,39,0.04)]">
+          <label class="font-label-caps text-label-caps text-outline">Correo Electronico</label>
+          <div class="flex items-center mt-1">
+            <span class="material-symbols-outlined text-on-surface-variant mr-3 text-[20px]">mail</span>
+            <input
+              class="bg-transparent border-none p-0 flex-1 font-body-lg text-body-lg text-on-surface focus:ring-0 focus:outline-none focus:border-b focus:border-primary transition-all"
+              type="email" value="piloto.demo@ping.auto">
+          </div>
+        </div>
+        <div
+          class="bg-surface-container-lowest rounded-xl p-4 flex flex-col gap-1 border border-surface-container-high shadow-[0_2px_8px_rgba(4,22,39,0.04)]">
+          <div class="flex justify-between items-center w-full">
+            <label class="font-label-caps text-label-caps text-outline">Preferencias de Conduccion</label>
+            <button class="text-secondary hover:text-primary transition-colors text-xs font-medium">EDITAR</button>
+          </div>
+          <div class="flex items-start mt-2">
+            <span class="material-symbols-outlined text-on-surface-variant mr-3 mt-1 text-[20px]">tune</span>
+            <div class="flex flex-col gap-2 w-full">
+              <!-- Perfil de Navegación -->
+              <div class="bg-surface-container-high/50 rounded-lg p-3 flex justify-between items-center gap-2">
+                <span class="font-body-sm text-body-sm text-on-surface flex-shrink-0">Perfil Navegación</span>
+                <select
+                  class="font-label-caps text-label-caps text-primary bg-primary-fixed px-2 py-0.5 rounded text-[10px] border-none focus:ring-1 focus:ring-primary focus:outline-none cursor-pointer appearance-none text-center max-w-[140px] w-full"
+                  title="Cauteloso: Prioriza distancia amplia. Estándar: Equilibrio. Exploración/Mapeo: Baja velocidad constante">
+                  <option value="ESTANDAR" selected>ESTÁNDAR</option>
+                  <option value="CAUTELOSO">CAUTELOSO</option>
+                  <option value="MAPEO">EXPLORACIÓN</option>
+                </select>
+              </div>
+              <!-- Límite de Velocidad -->
+              <div class="bg-surface-container-high/50 rounded-lg p-3 flex justify-between items-center gap-2">
+                <span class="font-body-sm text-body-sm text-on-surface flex-shrink-0">Límite Velocidad</span>
+                <select
+                  class="font-label-caps text-label-caps text-on-surface-variant bg-transparent border-none px-2 py-0.5 rounded text-[10px] focus:ring-1 focus:ring-primary focus:outline-none cursor-pointer appearance-none text-center max-w-[140px] w-full">
+                  <option value="5">5 KM/H</option>
+                  <option value="10" selected>10 KM/H</option>
+                  <option value="15">15 KM/H</option>
+                </select>
+              </div>
+              <!-- Margen de Seguridad -->
+              <div class="bg-surface-container-high/50 rounded-lg p-3 flex justify-between items-center gap-2">
+                <span class="font-body-sm text-body-sm text-on-surface flex-shrink-0">Margen Seguridad</span>
+                <select
+                  class="font-label-caps text-label-caps text-on-surface-variant bg-transparent border-none px-2 py-0.5 rounded text-[10px] focus:ring-1 focus:ring-primary focus:outline-none cursor-pointer appearance-none text-center max-w-[140px] w-full"
+                  title="Distancia mínima de frenado autónomo">
+                  <option value="0.5">0.5 M</option>
+                  <option value="1.0" selected>1.0 M</option>
+                  <option value="1.5">1.5 M</option>
+                </select>
+              </div>
+              <!-- Protocolo Pérdida de Señal -->
+              <div class="bg-surface-container-high/50 rounded-lg p-3 flex justify-between items-center gap-2">
+                <span class="font-body-sm text-body-sm text-on-surface flex-shrink-0">Failsafe Señal</span>
+                <select
+                  class="font-label-caps text-label-caps text-error bg-error-container/20 px-2 py-0.5 rounded text-[10px] border-none focus:ring-1 focus:ring-error focus:outline-none cursor-pointer appearance-none text-center max-w-[140px] w-full"
+                  title="Acción automática si se pierde la conexión">
+                  <option value="PARADA" selected>PARADA INMEDIATA</option>
+                  <option value="PAUSA">PAUSA EN SITIO</option>
+                  <option value="RETORNO">RETORNO A BASE</option>
+                </select>
+              </div>
+              <!-- Frecuencia Telemetría -->
+              <div class="bg-surface-container-high/50 rounded-lg p-3 flex justify-between items-center gap-2">
+                <span class="font-body-sm text-body-sm text-on-surface flex-shrink-0">Frec. Telemetría</span>
+                <select
+                  class="font-label-caps text-label-caps text-on-surface-variant bg-transparent border-none px-2 py-0.5 rounded text-[10px] focus:ring-1 focus:ring-primary focus:outline-none cursor-pointer appearance-none text-center max-w-[140px] w-full">
+                  <option value="100">100 MS</option>
+                  <option value="500" selected>500 MS</option>
+                  <option value="1000">1 S</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="mt-8 mb-4">
+        <button id="perfil-disconnect-btn"
+          class="w-full flex items-center justify-center gap-2 h-touch-target-min rounded-xl border border-error/30 text-error bg-error-container/20 font-headline-md text-headline-md hover:bg-error-container/50 active:scale-[0.98] transition-all duration-200">
+          <span class="material-symbols-outlined">logout</span>
+          Cerrar Sesion
+        </button>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" id="nav-perfil" aria-label="Navegación principal">
+      <button class="bottom-nav-item" data-nav="dashboard" type="button">
+        <span class="material-symbols-outlined">home</span>
+        <span class="nav-label">Inicio</span>
+      </button>
+      <button class="bottom-nav-item" data-nav="navegacion" type="button">
+        <span class="material-symbols-outlined">explore</span>
+        <span class="nav-label">Navegacion</span>
+      </button>
+      <button class="bottom-nav-item" data-nav="telemetria" type="button">
+        <span class="material-symbols-outlined">analytics</span>
+        <span class="nav-label">Telemetria</span>
+      </button>
+      <button class="bottom-nav-item" data-nav="vision" type="button">
+        <span class="material-symbols-outlined">visibility</span>
+        <span class="nav-label">Vision</span>
+      </button>
+      <button class="bottom-nav-item active-tab" data-nav="perfil" type="button">
+        <span class="material-symbols-outlined" style="font-variation-settings:'FILL' 1">person</span>
+        <span class="nav-label">Perfil</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- JAVASCRIPT: Global State + Router -->
+  <script>
+    'use strict';
+
+    /* ── Global State ─────────────────────────────────── */
+    const PingApp = {
+      state: { isConnected: false, vehicleId: '' },
+      VALID_IDS: ['PING-01'],
+
+      connect(id) {
+        this.state.isConnected = true;
+        this.state.vehicleId = id;
+        sessionStorage.setItem('ping_session', JSON.stringify(this.state));
+        this._updateDynamicUI();
+      },
+
+      disconnect() {
+        this.state.isConnected = false;
+        this.state.vehicleId = '';
+        sessionStorage.removeItem('ping_session');
+        Router.navigate('login');
+      },
+
+      validate(id) {
+        return this.VALID_IDS.includes(id.trim().toUpperCase());
+      },
+
+      _loadSession() {
+        try {
+          const raw = sessionStorage.getItem('ping_session');
+          if (raw) {
+            const s = JSON.parse(raw);
+            if (s.isConnected && s.vehicleId) {
+              this.state = s;
+              return true;
+            }
+          }
+        } catch (e) { }
+        return false;
+      },
+
+      _updateDynamicUI() {
+        const id = this.state.vehicleId;
+        const el = (i) => document.getElementById(i);
+
+        // Dashboard
+        if (el('status-label')) el('status-label').textContent = 'En linea (' + id + ')';
+        if (el('status-vehicle-id')) el('status-vehicle-id').textContent = id;
+        // Navigation chip
+        if (el('nav-vehicle-chip')) el('nav-vehicle-chip').textContent = id;
+        // Telemetry header
+        if (el('tele-vehicle-id')) el('tele-vehicle-id').textContent = id;
+        // Profile
+        if (el('perfil-vehicle-id')) el('perfil-vehicle-id').textContent = id;
+      }
+    };
+
+    /* ── Router ───────────────────────────────────────── */
+    const Router = {
+      current: 'login',
+      PROTECTED: ['dashboard', 'navegacion', 'telemetria', 'vision', 'perfil'],
+
+      navigate(route) {
+        if (this.PROTECTED.includes(route) && !PingApp.state.isConnected) {
+          route = 'login';
+        }
+        const prev = document.getElementById('screen-' + this.current);
+        if (prev) prev.classList.remove('active');
+        const next = document.getElementById('screen-' + route);
+        if (next) { next.classList.add('active'); next.scrollTop = 0; }
+        this.current = route;
+      }
+    };
+
+    /* ── Login Form ───────────────────────────────────── */
+    function initLoginForm() {
+      const form = document.getElementById('login-form');
+      const input = document.getElementById('vehicle_id');
+      const errorDiv = document.getElementById('login-error');
+      const errorText = document.getElementById('login-error-text');
+      const btnLabel = document.getElementById('btn-label');
+      const btnSpinner = document.getElementById('btn-spinner');
+      const btnIcon = document.getElementById('btn-icon');
+      const connectBtn = document.getElementById('connect-btn');
+
+      function showError(msg) {
+        errorDiv.style.display = 'flex';
+        errorDiv.classList.add('error-slide-in');
+        errorText.textContent = msg;
+        input.style.borderColor = '#ba1a1a';
+      }
+      function clearError() {
+        errorDiv.style.display = 'none';
+        input.style.borderColor = '';
+      }
+
+      input.addEventListener('input', clearError);
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        clearError();
+        const id = input.value.trim().toUpperCase();
+
+        if (!id) {
+          showError('Por favor ingresa el ID del vehiculo.');
+          input.focus();
+          return;
+        }
+
+        connectBtn.disabled = true;
+        btnLabel.textContent = 'Conectando...';
+        btnSpinner.classList.remove('hidden');
+        btnIcon.classList.add('hidden');
+
+        setTimeout(() => {
+          if (PingApp.validate(id)) {
+            PingApp.connect(id);
+            input.value = '';
+            Router.navigate('dashboard');
+          } else {
+            showError('ID de vehiculo no encontrado. Usa PING-01.');
+            input.focus();
+            input.select();
+          }
+          connectBtn.disabled = false;
+          btnLabel.textContent = 'Conectar Vehiculo';
+          btnSpinner.classList.add('hidden');
+          btnIcon.classList.remove('hidden');
+        }, 900);
+      });
+    }
+
+    /* ── Disconnect Buttons ───────────────────────────── */
+    function initDisconnectButtons() {
+      ['header-disconnect-btn', 'perfil-disconnect-btn'].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) btn.addEventListener('click', () => PingApp.disconnect());
+      });
+    }
+
+    /* ── Engine Button ────────────────────────────────── */
+    function initEngineButton() {
+      const btn = document.getElementById('card-engine-btn');
+      const icon = document.getElementById('card-engine-icon');
+      const text = document.getElementById('card-engine-text');
+      const navBtn = document.getElementById('nav-module-btn');
+      const navOverlay = document.getElementById('nav-lock-overlay');
+
+      if (btn) {
+        btn.addEventListener('click', () => {
+          if (btn.dataset.state === 'starting' || btn.dataset.state === 'started') return;
+
+          btn.dataset.state = 'starting';
+          icon.textContent = 'hourglass_empty';
+          icon.classList.add('animate-spin');
+          text.innerHTML = 'INICIANDO<br>MOTOR...';
+
+          setTimeout(() => {
+            btn.dataset.state = 'started';
+            icon.classList.remove('animate-spin');
+            btn.classList.remove('text-primary', 'hover:bg-primary-container/30');
+            btn.classList.add('text-[#34C759]', 'hover:bg-[#34C759]/10');
+            icon.textContent = 'check_circle';
+            text.innerHTML = 'MOTOR<br>LISTO';
+
+            if (navOverlay) navOverlay.remove();
+
+            // Unlock the dashboard grid button
+            document.querySelectorAll('button[data-nav="navegacion"]:not(.bottom-nav-item)').forEach(b => {
+              b.classList.remove('opacity-50', 'pointer-events-none');
+            });
+            // Unlock bottom nav items for navegacion
+            document.querySelectorAll('.bottom-nav-item[data-nav="navegacion"]').forEach(b => {
+              b.classList.remove('nav-locked');
+            });
+
+            alert("Confirmación: El motor está listo y en línea.");
+          }, 1500);
+        });
+      }
+    }
+
+    /* ── Navigation ───────────────────────────────────── */
+    function initNavigation() {
+      // Lock navegacion nav items by default
+      document.querySelectorAll('.bottom-nav-item[data-nav="navegacion"], button[data-nav="navegacion"]').forEach(btn => {
+        if (!btn.closest('nav.bottom-nav')) {
+          // Only lock the dashboard grid button, not the bottom nav items
+          btn.classList.add('opacity-50', 'pointer-events-none');
+        } else {
+          btn.classList.add('nav-locked');
+        }
+      });
+
+      document.querySelectorAll('[data-nav]').forEach(btn => {
+        // Use both click and touchend to ensure touch devices respond
+        const handleNav = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const target = btn.dataset.nav;
+          // Check if locked
+          if (btn.classList.contains('nav-locked')) return;
+          Router.navigate(target);
+        };
+
+        btn.addEventListener('click', handleNav);
+        btn.addEventListener('touchend', handleNav, { passive: false });
+      });
+    }
+
+    /* ── Toast Utility ────────────────────────────────── */
+    let _toastTimer = null;
+    function showMapToast(message) {
+      const toast = document.getElementById('map-toast');
+      const toastText = document.getElementById('map-toast-text');
+      if (!toast) return;
+      if (_toastTimer) clearTimeout(_toastTimer);
+      if (message) toastText.textContent = message;
+      toast.classList.add('show');
+      _toastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3500);
+    }
+
+    /* ── Interactive Map (Phase 2) ──────────────────────── */
+    function initMapModule() {
+      const mapContainer = document.getElementById('ping-map');
+      if (!mapContainer || typeof L === 'undefined') return;
+
+      // Initial Coordinates (UCAB, Caracas)
+      const initialLat = 10.4646;
+      const initialLng = -66.9763;
+
+      const map = L.map('ping-map', {
+        zoomControl: false,
+        attributionControl: false
+      }).setView([initialLat, initialLng], 15);
+
+      // Tile Layer: OpenStreetMap
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19
+      }).addTo(map);
+
+      // Buggy Vehicle Marker
+      const buggyIcon = L.divIcon({
+        html: `
+        <div class="w-12 h-12 bg-secondary rounded-full flex items-center justify-center shadow-lg border-4 border-surface-container-lowest relative" style="transform: translate(-50%, -50%);">
+          <span class="material-symbols-outlined text-on-secondary" style="font-variation-settings:'FILL' 1; font-size: 24px;">directions_car</span>
+          <div class="absolute inset-0 rounded-full border-2 border-secondary animate-ping opacity-50"></div>
+        </div>
+      `,
+        className: '',
+        iconSize: [0, 0]
+      });
+      L.marker([initialLat, initialLng], { icon: buggyIcon, zIndexOffset: 1000 }).addTo(map);
+
+      // Destination Pin
+      const pinIcon = L.divIcon({
+        html: `
+        <div class="relative flex flex-col items-center" style="transform: translate(-50%, -100%); z-index: 100;">
+          <div class="w-10 h-10 bg-error rounded-full flex items-center justify-center shadow-lg border-2 border-surface-container-lowest animate-bounce">
+            <span class="material-symbols-outlined text-on-error" style="font-size: 20px; font-variation-settings:'FILL' 1;">location_on</span>
+          </div>
+          <div class="w-1 h-3 bg-error mt-[-4px]"></div>
+          <div class="w-4 h-1.5 bg-black/50 rounded-[50%] blur-[2px]"></div>
+        </div>
+      `,
+        className: '',
+        iconSize: [0, 0]
+      });
+
+      // History Pin (semi-transparent)
+      const historyPinIcon = L.divIcon({
+        html: `
+        <div class="relative flex flex-col items-center opacity-60 hover:opacity-100 transition-opacity cursor-pointer" style="transform: translate(-50%, -100%);">
+          <div class="w-8 h-8 bg-tertiary rounded-full flex items-center justify-center shadow-md border-2 border-surface-container-lowest">
+            <span class="material-symbols-outlined text-on-tertiary" style="font-size: 16px;">history</span>
+          </div>
+          <div class="w-0.5 h-2 bg-tertiary mt-[-2px]"></div>
+        </div>
+      `,
+        className: '',
+        iconSize: [0, 0]
+      });
+
+      let isSelectingRoute = false;
+      let selectedDestination = null;
+      let destinationMarker = null;
+      let historyMarkers = [];
+      let historyVisible = false;
+
+      const prevDestinations = [
+        { lat: 10.4680, lng: -66.9740 },
+        { lat: 10.4610, lng: -66.9790 },
+        { lat: 10.4655, lng: -66.9720 }
+      ];
+
+      const btnSelect = document.getElementById('btn-select-route');
+      const selectText = document.getElementById('select-route-text');
+      const btnStart = document.getElementById('btn-start-route');
+      const btnPrevFloat = document.getElementById('btn-prev-dest-float');
+      const btnLocateMe = document.getElementById('btn-locate-me');
+      const bottomSheet = document.getElementById('bottom-sheet');
+      const bottomSheetHandle = document.getElementById('bottom-sheet-handle');
+      const bottomSheetIcon = document.getElementById('bottom-sheet-icon');
+
+      // Bottom Sheet Logic
+      let sheetExpanded = false;
+      bottomSheetHandle.addEventListener('click', () => {
+        sheetExpanded = !sheetExpanded;
+        if (sheetExpanded) {
+          bottomSheet.classList.remove('translate-y-[calc(100%-48px)]');
+          bottomSheetIcon.classList.add('rotate-180');
+        } else {
+          bottomSheet.classList.add('translate-y-[calc(100%-48px)]');
+          bottomSheetIcon.classList.remove('rotate-180');
+        }
+      });
+
+      // Make map render properly when tab becomes active
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((m) => {
+          if (m.target.id === 'screen-navegacion' && m.target.classList.contains('active')) {
+            setTimeout(() => map.invalidateSize(), 300);
+          }
+        });
+      });
+      observer.observe(document.getElementById('screen-navegacion'), { attributes: true, attributeFilter: ['class'] });
+
+      const updateStartButton = () => {
+        if (selectedDestination) {
+          btnStart.classList.remove('bg-surface-container', 'text-outline', 'cursor-not-allowed', 'opacity-70');
+          btnStart.classList.add('bg-primary', 'text-on-primary', 'shadow-[0_4px_16px_rgba(4,22,39,0.3)]', 'scale-100');
+          btnStart.classList.remove('scale-[0.98]');
+        } else {
+          btnStart.classList.add('bg-surface-container', 'text-outline', 'cursor-not-allowed', 'opacity-70');
+          btnStart.classList.remove('bg-primary', 'text-on-primary', 'shadow-[0_4px_16px_rgba(4,22,39,0.3)]');
+        }
+      };
+
+      btnSelect.addEventListener('click', () => {
+        isSelectingRoute = !isSelectingRoute;
+        if (isSelectingRoute) {
+          btnSelect.classList.add('bg-secondary', 'text-on-secondary');
+          btnSelect.classList.remove('bg-surface-container-high', 'text-on-surface-variant');
+          selectText.textContent = 'Toca el mapa para fijar destino...';
+          document.getElementById('ping-map').style.cursor = 'crosshair';
+
+          // Auto collapse sheet to see the map
+          if (sheetExpanded) {
+            bottomSheetHandle.click();
+          }
+        } else {
+          btnSelect.classList.remove('bg-secondary', 'text-on-secondary');
+          btnSelect.classList.add('bg-surface-container-high', 'text-on-surface-variant');
+          selectText.textContent = 'Seleccionar Ruta';
+          document.getElementById('ping-map').style.cursor = '';
+        }
+      });
+
+      /* ── Reverse Geocoding validation ────────────────── */
+      const ROAD_TYPES = new Set([
+        'motorway', 'trunk', 'primary', 'secondary', 'tertiary', 'unclassified',
+        'residential', 'service', 'living_street', 'pedestrian', 'track', 'road',
+        'motorway_link', 'trunk_link', 'primary_link', 'secondary_link', 'tertiary_link',
+        'busway', 'cycleway', 'footway', 'path', 'steps', 'corridor'
+      ]);
+
+      async function isRoadLocation(lat, lng) {
+        // Usamos el endpoint OSRM Nearest con perfil 'foot' para incluir senderos, caminerías y calles
+        const url = `https://router.project-osrm.org/nearest/v1/foot/${lng},${lat}?number=1`;
+        try {
+          const resp = await fetch(url);
+          if (!resp.ok) return { valid: true, lat, lng }; // fail-open en caso de error de red
+          const data = await resp.json();
+
+          if (data.code === 'Ok' && data.waypoints && data.waypoints.length > 0) {
+            const wp = data.waypoints[0];
+            // Validamos que la vía más cercana esté dentro del radio de 50 metros
+            if (wp.distance <= 50) {
+              return {
+                valid: true,
+                lat: wp.location[1], // OSRM devuelve [lon, lat]
+                lng: wp.location[0],
+                distance: wp.distance
+              };
+            }
+          }
+          return { valid: false };
+        } catch (err) {
+          console.warn('OSRM error:', err);
+          return { valid: true, lat, lng }; // fail-open
+        }
+      }
+
+      const validatingOverlay = document.getElementById('map-validating-overlay');
+
+      map.on('click', async (e) => {
+        if (!isSelectingRoute) return;
+
+        const { lat, lng } = e.latlng;
+
+        // Show validating overlay
+        if (validatingOverlay) validatingOverlay.style.display = 'flex';
+
+        const result = await isRoadLocation(lat, lng);
+
+        if (validatingOverlay) validatingOverlay.style.display = 'none';
+
+        if (!result.valid) {
+          showMapToast('Destino inválido: No se encontró una vía transitable en un radio de 50 metros.');
+          return; // Do NOT place marker
+        }
+
+        // Snap to road (Acoplamiento automático)
+        const snappedLat = result.lat !== undefined ? result.lat : lat;
+        const snappedLng = result.lng !== undefined ? result.lng : lng;
+
+        selectedDestination = { lat: snappedLat, lng: snappedLng };
+
+        if (destinationMarker) map.removeLayer(destinationMarker);
+        destinationMarker = L.marker([snappedLat, snappedLng], { icon: pinIcon }).addTo(map);
+
+        // Auto-exit selection mode
+        isSelectingRoute = false;
+        btnSelect.classList.remove('bg-secondary', 'text-on-secondary');
+        btnSelect.classList.add('bg-surface-container-high', 'text-on-surface-variant');
+        selectText.textContent = 'Seleccionar Ruta';
+        document.getElementById('ping-map').style.cursor = '';
+
+        updateStartButton();
+
+        // Re-open sheet
+        if (!sheetExpanded) {
+          bottomSheetHandle.click();
+        }
+      });
+
+      btnStart.addEventListener('click', () => {
+        if (!selectedDestination) return;
+
+        alert(`Enviando coordenadas [${selectedDestination.lat.toFixed(5)}, ${selectedDestination.lng.toFixed(5)}] al vehículo "PING-01"...`);
+
+        if (destinationMarker) {
+          map.removeLayer(destinationMarker);
+          destinationMarker = null;
+        }
+        selectedDestination = null;
+        updateStartButton();
+      });
+
+      btnPrevFloat.addEventListener('click', () => {
+        historyVisible = !historyVisible;
+
+        if (historyVisible) {
+          btnPrevFloat.classList.add('bg-tertiary', 'text-on-tertiary');
+          btnPrevFloat.classList.remove('bg-surface-container-lowest', 'text-on-surface');
+
+          prevDestinations.forEach(dest => {
+            const marker = L.marker([dest.lat, dest.lng], { icon: historyPinIcon }).addTo(map);
+            marker.on('click', () => {
+              selectedDestination = { lat: dest.lat, lng: dest.lng };
+              if (destinationMarker) map.removeLayer(destinationMarker);
+              destinationMarker = L.marker([dest.lat, dest.lng], { icon: pinIcon }).addTo(map);
+              updateStartButton();
+              map.flyTo([dest.lat, dest.lng], 16, { animate: true, duration: 0.8 });
+
+              if (!sheetExpanded) bottomSheetHandle.click();
+            });
+            historyMarkers.push(marker);
+          });
+        } else {
+          btnPrevFloat.classList.remove('bg-tertiary', 'text-on-tertiary');
+          btnPrevFloat.classList.add('bg-surface-container-lowest', 'text-on-surface');
+
+          historyMarkers.forEach(m => map.removeLayer(m));
+          historyMarkers = [];
+        }
+      });
+
+      btnLocateMe.addEventListener('click', () => {
+        if (!navigator.geolocation) {
+          alert("Tu navegador no soporta geolocalización.");
+          return;
+        }
+
+        btnLocateMe.classList.add('opacity-50', 'pointer-events-none');
+        btnLocateMe.innerHTML = `<span class="material-symbols-outlined animate-spin" style="font-variation-settings:'FILL' 0">sync</span> Buscando...`;
+
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+
+            selectedDestination = { lat, lng };
+            if (destinationMarker) map.removeLayer(destinationMarker);
+            destinationMarker = L.marker([lat, lng], { icon: pinIcon }).addTo(map);
+
+            map.flyTo([lat, lng], 17, { animate: true, duration: 1.2 });
+            updateStartButton();
+
+            btnLocateMe.classList.remove('opacity-50', 'pointer-events-none');
+            btnLocateMe.innerHTML = `<span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0">person_pin_circle</span> Búscame`;
+          },
+          (err) => {
+            alert("No se pudo obtener la ubicación. Verifica los permisos de tu navegador.");
+            btnLocateMe.classList.remove('opacity-50', 'pointer-events-none');
+            btnLocateMe.innerHTML = `<span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0">person_pin_circle</span> Búscame`;
+          }
+        );
+      });
+    }
+
+    /* ── Telemetry Simulator (Phase 3) ──────────────────── */
+    function initTelemetryModule() {
+      const spdGauge = document.getElementById('tele-speed-gauge');
+      const spdVal = document.getElementById('tele-speed-val');
+      const accGauge = document.getElementById('tele-accel-gauge');
+      const accVal = document.getElementById('tele-accel-val');
+      const battBar = document.getElementById('tele-batt-bar');
+      const battVal = document.getElementById('tele-batt-val');
+      const battIcon = document.getElementById('tele-batt-icon');
+      const fuelBar = document.getElementById('tele-fuel-bar');
+      const fuelVal = document.getElementById('tele-fuel-val');
+      const tempMask = document.getElementById('tele-temp-mask');
+      const tempVal = document.getElementById('tele-temp-val');
+      const distVal = document.getElementById('tele-distance-val');
+
+      if (!spdGauge) return;
+
+      let state = {
+        speed: 0,
+        acceleration: 0,
+        battery: 0,
+        fuel: 0,
+        temperature: 0,
+        distance: 0
+      };
+
+      // Helper: SVG Path length is ~157.1
+      const setGauge = (element, percent) => {
+        const p = Math.max(0, Math.min(100, percent));
+        const offset = 157.1 - (157.1 * p / 100);
+        element.style.strokeDashoffset = offset;
+      };
+
+      const socket = io('https://vehiculo-backend.onrender.com');
+
+      const updateUI = () => {
+        // UI Updates
+        const spdPct = (state.speed / 50) * 100;
+        setGauge(spdGauge, spdPct);
+        spdVal.textContent = Math.round(state.speed);
+
+        // Accel: map absolute 0-5 to 0-100%
+        const absAcc = Math.abs(state.acceleration);
+        const accPct = (absAcc / 5) * 100;
+        setGauge(accGauge, accPct);
+        accVal.textContent = state.acceleration.toFixed(1);
+
+        battVal.textContent = Math.round(state.battery) + '%';
+        battBar.style.width = state.battery + '%';
+        if (state.battery > 50) {
+          battBar.style.backgroundColor = '#34C759';
+          battIcon.style.color = '#34C759';
+          battIcon.textContent = 'battery_charging_full';
+        } else if (state.battery > 20) {
+          battBar.style.backgroundColor = '#FFCC00';
+          battIcon.style.color = '#FFCC00';
+          battIcon.textContent = 'battery_5_bar';
+        } else {
+          battBar.style.backgroundColor = '#FF3B30';
+          battIcon.style.color = '#FF3B30';
+          battIcon.textContent = 'battery_alert';
+        }
+
+        fuelVal.textContent = Math.round(state.fuel) + '%';
+        fuelBar.style.width = state.fuel + '%';
+
+        // Temp: 20 -> 0%, 120 -> 100%
+        const tempPct = Math.max(0, Math.min(100, ((state.temperature - 20) / 100) * 100));
+        tempVal.textContent = Math.round(state.temperature) + '°C';
+        if (tempMask) tempMask.style.width = (100 - tempPct) + '%';
+
+        if (distVal) {
+          const dStr = state.distance.toFixed(1).padStart(6, '0');
+          distVal.textContent = dStr;
+        }
+      };
+
+      const parseVal = (data) => {
+        let val = parseFloat(data);
+        return isNaN(val) ? 0 : val;
+      };
+
+      socket.on('bateria', (data) => {
+        state.battery = parseVal(data);
+        updateUI();
+      });
+
+      socket.on('combustible', (data) => {
+        state.fuel = parseVal(data);
+        updateUI();
+      });
+
+      socket.on('temperatura', (data) => {
+        state.temperature = parseVal(data);
+        updateUI();
+      });
+
+      socket.on('velocidad', (data) => {
+        state.speed = parseVal(data);
+        updateUI();
+      });
+
+      socket.on('aceleracion', (data) => {
+        state.acceleration = parseVal(data);
+        updateUI();
+      });
+
+      socket.on('distancia', (data) => {
+        state.distance = parseVal(data);
+        updateUI();
+      });
+
+      // Inicializar la interfaz visual con los valores en 0
+      updateUI();
+    }
+
+    /* ── Vision Module Simulator (Phase 4) ──────────────────── */
+    function initVisionToggle() {
+      const toggle = document.getElementById('vision-toggle');
+      const toggleDesc = document.getElementById('toggle-desc');
+      const overlay = document.getElementById('processing-overlay');
+      const fpsCounter = document.getElementById('fps-counter');
+      const latencyCounter = document.getElementById('latency-counter');
+      const bboxStatus = document.getElementById('bbox-status');
+      const btnEstop = document.getElementById('btn-estop');
+
+      if (!toggle || !btnEstop) return;
+
+      toggle.addEventListener('change', (e) => {
+        if (e.target.checked) {
+          toggleDesc.textContent = "Procesamiento Digital (Activo)";
+          overlay.classList.remove('opacity-0');
+          overlay.classList.add('opacity-100');
+          bboxStatus.classList.remove('opacity-0');
+          bboxStatus.classList.add('opacity-100');
+          fpsCounter.classList.add('text-error');
+          fpsCounter.classList.remove('text-white');
+        } else {
+          toggleDesc.textContent = "Vista Cruda (RGB)";
+          overlay.classList.add('opacity-0');
+          overlay.classList.remove('opacity-100');
+          bboxStatus.classList.add('opacity-0');
+          bboxStatus.classList.remove('opacity-100');
+          fpsCounter.classList.remove('text-error');
+          fpsCounter.classList.add('text-white');
+        }
+      });
+
+      // Fluctuating FPS and Latency
+      setInterval(() => {
+        const isProcessing = toggle.checked;
+        // FPS between 28 and 32
+        const baseFps = 30;
+        const varianceFps = Math.floor(Math.random() * 5) - 2; // -2 to +2
+        fpsCounter.textContent = baseFps + varianceFps;
+
+        // Latency between 40 and 60
+        const baseLat = 50;
+        const varianceLat = Math.floor(Math.random() * 21) - 10; // -10 to +10
+        latencyCounter.textContent = (baseLat + varianceLat) + 'ms';
+      }, 1500);
+
+      btnEstop.addEventListener('click', () => {
+        alert("¡ALERTA! Interrupción de emergencia enviada al motor");
+      });
+    }
+
+    /* ── Profile Module Simulator (Phase 5) ──────────────────── */
+    function initProfileModule() {
+      const uploadInput = document.getElementById('avatar-upload');
+      const avatarImg = document.getElementById('profile-avatar-img');
+      // Update the small avatar in the header too
+      const topAvatarImg = document.querySelector('#screen-perfil header img[alt="Avatar"]');
+
+      if (!uploadInput || !avatarImg) return;
+
+      uploadInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const imageUrl = URL.createObjectURL(file);
+          avatarImg.src = imageUrl;
+          if (topAvatarImg) {
+            topAvatarImg.src = imageUrl;
+          }
+        }
+      });
+
+      const fullNameInput = document.getElementById('input-full-name');
+      const profileDisplayName = document.getElementById('profile-display-name');
+
+      if (fullNameInput && profileDisplayName) {
+        fullNameInput.addEventListener('input', (e) => {
+          profileDisplayName.textContent = e.target.value || 'Piloto Demo';
+        });
+      }
+    }
+
+    /* ── Bootstrap ────────────────────────────────────── */
+    document.addEventListener('DOMContentLoaded', () => {
+      initLoginForm();
+      initDisconnectButtons();
+      initEngineButton();
+      initNavigation();
+      initVisionToggle();
+      initMapModule();
+      initTelemetryModule();
+      initProfileModule();
+      if (PingApp._loadSession()) {
+        PingApp._updateDynamicUI();
+        Router.navigate('dashboard');
+      }
+    });
+  </script>
+  <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+</body>
+
+</html>

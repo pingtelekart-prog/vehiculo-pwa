@@ -1,0 +1,349 @@
+<!DOCTYPE html><html class="light" lang="es" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport">
+<title>PING - Visión</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1;
+        }
+        
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c4c6cd;
+            border-radius: 4px;
+        }
+        
+        /* Toggle Switch Custom Styling */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #041627;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #041627;
+        }
+        
+        /* Pulse Animation for E-STOP */
+        @keyframes pulse-danger {
+            0% { box-shadow: 0 0 0 0 rgba(186, 26, 26, 0.4); }
+            70% { box-shadow: 0 0 0 15px rgba(186, 26, 26, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(186, 26, 26, 0); }
+        }
+        .e-stop-pulse {
+            animation: pulse-danger 2s infinite;
+        }
+        
+        /* Camera UI overlays */
+        .camera-crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            pointer-events: none;
+        }
+        .camera-crosshair::before, .camera-crosshair::after {
+            content: '';
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.6);
+        }
+        .camera-crosshair::before {
+            top: 50%; left: 0; right: 0; height: 1px;
+        }
+        .camera-crosshair::after {
+            left: 50%; top: 0; bottom: 0; width: 1px;
+        }
+    </style>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-dim": "#dbd9db",
+                    "on-tertiary-container": "#a88c69",
+                    "on-primary": "#ffffff",
+                    "on-primary-fixed-variant": "#38485a",
+                    "primary-fixed": "#d2e4fb",
+                    "surface-variant": "#e4e2e3",
+                    "tertiary-container": "#38260b",
+                    "tertiary-fixed": "#feddb5",
+                    "inverse-on-surface": "#f2f0f2",
+                    "on-secondary-fixed": "#001a41",
+                    "primary-container": "#1a2b3c",
+                    "on-tertiary-fixed": "#281802",
+                    "outline": "#74777d",
+                    "on-tertiary": "#ffffff",
+                    "tertiary": "#211200",
+                    "error": "#ba1a1a",
+                    "secondary-container": "#0070eb",
+                    "background": "#fbf9fa",
+                    "on-background": "#1b1c1d",
+                    "surface-container-low": "#f5f3f4",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-bright": "#fbf9fa",
+                    "secondary-fixed": "#d8e2ff",
+                    "on-secondary-fixed-variant": "#004493",
+                    "outline-variant": "#c4c6cd",
+                    "inverse-surface": "#303032",
+                    "secondary": "#0058bc",
+                    "error-container": "#ffdad6",
+                    "on-tertiary-fixed-variant": "#584326",
+                    "primary-fixed-dim": "#b7c8de",
+                    "surface-container-high": "#e9e7e9",
+                    "on-primary-fixed": "#0b1d2d",
+                    "on-surface-variant": "#44474c",
+                    "inverse-primary": "#b7c8de",
+                    "secondary-fixed-dim": "#adc6ff",
+                    "on-secondary-container": "#fefcff",
+                    "on-error": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "surface-container": "#efedef",
+                    "tertiary-fixed-dim": "#e1c29b",
+                    "surface": "#fbf9fa",
+                    "surface-tint": "#4f6073",
+                    "surface-container-highest": "#e4e2e3",
+                    "on-surface": "#1b1c1d",
+                    "on-secondary": "#ffffff",
+                    "primary": "#041627",
+                    "on-primary-container": "#8192a7"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-page": "20px",
+                    "safe-area-bottom": "34px",
+                    "gutter-grid": "16px",
+                    "stack-sm": "8px",
+                    "stack-md": "16px",
+                    "touch-target-min": "48px",
+                    "stack-lg": "24px"
+            },
+            "fontFamily": {
+                    "body-sm": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "label-caps": ["JetBrains Mono"],
+                    "status-number": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "body-lg": ["17px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "30px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "status-number": ["18px", {"lineHeight": "24px", "fontWeight": "500"}]
+            }
+          }
+        }
+      }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-lg min-h-screen flex flex-col pt-[72px] pb-[90px] md:pb-0 overflow-x-hidden selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-page h-touch-target-min bg-background/80 backdrop-blur-md">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden">
+<span class="material-symbols-outlined text-primary text-[20px]">robot_2</span>
+</div>
+<h1 class="font-headline-md text-headline-md font-bold tracking-tighter text-primary">PING</h1>
+</div>
+<button aria-label="Sensors Status" class="w-touch-target-min h-touch-target-min flex items-center justify-center text-outline hover:opacity-80 transition-opacity active:scale-95 duration-100 rounded-full">
+<span class="material-symbols-outlined">sensors</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col px-margin-page gap-stack-lg max-w-3xl mx-auto w-full pt-stack-md">
+<!-- Header Title Section -->
+<div class="flex flex-col gap-stack-sm">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-error animate-pulse"></span>
+<span class="font-label-caps text-label-caps text-error">Live feed</span>
+</div>
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-primary">Visión de Cámara</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Transmisión en tiempo real del sensor óptico.</p>
+</div>
+<!-- Camera Viewport Container -->
+<div class="relative w-full aspect-square md:aspect-video bg-[#111111] rounded-xl overflow-hidden shadow-sm border border-outline-variant flex flex-col">
+<!-- Simulated Video Feed (Placeholder Image) -->
+<img alt="Camera Feed" class="absolute inset-0 w-full h-full object-cover opacity-80" data-alt="A highly detailed, realistic first-person view from a vehicle's front camera driving down a modern, clean city street during the day. The image has a slightly desaturated, technical, almost military or industrial look, typical of machine vision feeds. The lighting is harsh and utilitarian, emphasizing clear shapes and high contrast. The mood is clinical and precise, fitting a professional autonomous vehicle control interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0x8p3H1GfZ3iIGhK8ZFhU9Kz974gfYDfd2fS_3aD13ThyJ18j8vWcXTYQlQHa1U_iLY_0mPQ0SrnGJxQhXHy9os1rS7NJYf0k64tFypwlbQO7XGeFrAykifIT-RWLyibYOeSX3fFU5hurRLMW9gX1JbIZHL_Vqxpu3t4Wqb5nnYKnEv7osl9w2cxeMBwYd0Sff79T60KC-u4nKqWSZTGyKXa2XF1zWQ54y1SMJDr-iV-F82e890gu">
+<!-- Digital Overlay Effects -->
+<div class="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60 pointer-events-none"></div>
+<!-- Telemetry Overlay - Top Left -->
+<div class="absolute top-4 left-4 flex flex-col gap-1">
+<div class="bg-black/60 backdrop-blur-sm rounded px-2 py-1 flex items-center gap-2 border border-white/10">
+<span class="font-label-caps text-[10px] text-white/70">FPS</span>
+<span class="font-status-number text-status-number font-bold text-white" id="fps-counter">31</span>
+</div>
+<div class="bg-black/60 backdrop-blur-sm rounded px-2 py-1 flex items-center gap-2 border border-white/10">
+<span class="font-label-caps text-[10px] text-white/70">LATENCIA</span>
+<span class="font-status-number text-[14px] text-white font-medium">45ms</span>
+</div>
+</div>
+<!-- Status Overlay - Top Right -->
+<div class="absolute top-4 right-4">
+<div class="bg-black/60 backdrop-blur-sm rounded px-2 py-1 flex items-center gap-1.5 border border-white/10">
+<span class="material-symbols-outlined text-white/70 text-[14px]">videocam</span>
+<span class="font-label-caps text-[10px] text-white">REC</span>
+</div>
+</div>
+<!-- Crosshair -->
+<div class="camera-crosshair"></div>
+<!-- Digital Processing Grid (Hidden by default, toggled via JS) -->
+<div class="absolute inset-0 transition-opacity duration-300 pointer-events-none mix-blend-overlay opacity-0" id="processing-overlay">
+<div class="w-full h-full" style="background-image: radial-gradient(rgba(0, 255, 0, 0.2) 1px, transparent 1px); background-size: 20px 20px;"></div>
+<!-- Bounding boxes simulation -->
+<div class="absolute top-[30%] left-[40%] w-[120px] h-[80px] border-2 border-[#00FF00] bg-[rgba(0,255,0,0.1)]">
+<span class="absolute -top-5 left-0 bg-[#00FF00] text-black font-label-caps text-[10px] px-1 font-bold">VEHICLE 98%</span>
+</div>
+</div>
+<!-- Bottom Camera Controls / Info within the viewport -->
+<div class="absolute bottom-4 left-4 right-4 flex justify-between items-end">
+<div class="flex flex-col gap-1">
+<span class="font-label-caps text-[10px] text-white/70">SENSOR ID</span>
+<span class="font-label-caps text-[12px] text-white">OPT-CAM-01-FWD</span>
+</div>
+<div class="flex gap-2">
+<button class="w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white hover:bg-black/70 active:scale-95 transition-all">
+
+</button>
+<button class="w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white hover:bg-black/70 active:scale-95 transition-all">
+<span class="material-symbols-outlined text-[18px]">screenshot</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Controls Section -->
+<div class="flex flex-col gap-stack-md bg-surface-container-lowest rounded-xl p-5 shadow-[0_4px_12px_rgba(4,22,39,0.05)] border border-surface-container-highest">
+<!-- View Mode Toggle -->
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-body-lg text-body-lg text-on-surface font-medium">Modo de Visión</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant" id="toggle-desc">Vista Cruda (RGB)</span>
+</div>
+<!-- Toggle Switch -->
+<div class="relative inline-block w-14 mr-2 align-middle select-none transition duration-200 ease-in">
+<input class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 border-outline appearance-none cursor-pointer z-10 top-0 left-0 transition-all duration-300" id="vision-toggle" name="toggle" type="checkbox" placeholder="on" value="">
+<label class="toggle-label block overflow-hidden h-7 rounded-full bg-surface-container-highest cursor-pointer border border-outline-variant transition-colors duration-300" for="vision-toggle"></label>
+</div>
+</div>
+<hr class="border-outline-variant/30">
+<!-- Technical Data Readout -->
+<div class="grid grid-cols-2 gap-gutter-grid">
+<div class="flex flex-col gap-1">
+
+
+</div>
+<div class="flex flex-col gap-1">
+
+
+</div>
+</div>
+</div>
+<!-- Emergency Stop Section -->
+<div class="mt-auto md:mt-8 pb-4">
+<button class="w-full h-[80px] bg-error hover:bg-[#93000a] text-on-error rounded-xl font-headline-md text-headline-md font-bold tracking-widest uppercase flex items-center justify-center gap-3 shadow-[0_8px_16px_rgba(186,26,26,0.3)] active:scale-[0.98] transition-all duration-150 e-stop-pulse">
+<span class="material-symbols-outlined text-[32px] filled">warning</span>
+                STOP / E-STOP
+            </button>
+<p class="text-center font-label-caps text-[10px] text-on-surface-variant mt-3 opacity-70">Corte inmediato de la ruta y activación de frenos.</p>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) / SideNav (Desktop) Representation -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 pt-2 pb-safe-area-bottom bg-surface-container-lowest dark:bg-primary-container shadow-[0_-4px_12px_rgba(4,22,39,0.15)] rounded-t-xl md:hidden">
+<!-- Inactive -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-variant transition-colors rounded-lg w-full max-w-[64px]" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1">home</span>
+<span class="font-label-caps text-[10px]">Inicio</span>
+</a>
+<!-- Inactive -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-variant transition-colors rounded-lg w-full max-w-[64px]" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1">explore</span>
+<span class="font-label-caps text-[10px]">Navegación</span>
+</a>
+<!-- Inactive -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-variant transition-colors rounded-lg w-full max-w-[64px]" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1">analytics</span>
+<span class="font-label-caps text-[10px]">Telemetría</span>
+</a>
+<!-- ACTIVE TAB -->
+<a class="flex flex-col items-center justify-center bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary rounded-full px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-variant transition-colors w-full max-w-[80px] shadow-sm" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1 filled">visibility</span>
+<span class="font-label-caps text-[10px] font-bold">Visión</span>
+</a>
+<!-- Inactive -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline-variant px-4 py-1 hover:bg-surface-container-high dark:hover:bg-surface-variant transition-colors rounded-lg w-full max-w-[64px]" href="#">
+<span class="material-symbols-outlined text-[24px] mb-1">person</span>
+<span class="font-label-caps text-[10px]">Perfil</span>
+</a>
+</nav>
+<!-- Desktop Navigation Stand-in (Visible only md+) -->
+<aside class="hidden md:flex fixed top-0 left-0 h-full w-[80px] bg-surface-container-lowest border-r border-outline-variant/30 flex-col items-center py-stack-lg gap-8 pt-[90px] z-40">
+<a class="w-12 h-12 flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-colors" href="#"><span class="material-symbols-outlined">home</span></a>
+<a class="w-12 h-12 flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-colors" href="#"><span class="material-symbols-outlined">explore</span></a>
+<a class="w-12 h-12 flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-colors" href="#"><span class="material-symbols-outlined">analytics</span></a>
+<a class="w-12 h-12 flex items-center justify-center bg-secondary-container text-on-secondary-container rounded-xl transition-colors shadow-sm" href="#"><span class="material-symbols-outlined filled">visibility</span></a>
+<div class="mt-auto">
+<a class="w-12 h-12 flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high rounded-xl transition-colors" href="#"><span class="material-symbols-outlined">person</span></a>
+</div>
+</aside>
+<!-- JavaScript for Interactions -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggle = document.getElementById('vision-toggle');
+            const toggleDesc = document.getElementById('toggle-desc');
+            const overlay = document.getElementById('processing-overlay');
+            const fpsCounter = document.getElementById('fps-counter');
+
+            // Toggle functionality
+            toggle.addEventListener('change', (e) => {
+                if(e.target.checked) {
+                    toggleDesc.textContent = "Procesamiento Digital (Activo)";
+                    overlay.classList.remove('opacity-0');
+                    overlay.classList.add('opacity-100');
+                    // Simulate slight FPS drop during processing
+                    fpsCounter.textContent = "24";
+                    fpsCounter.classList.add('text-error');
+                    fpsCounter.classList.remove('text-white');
+                } else {
+                    toggleDesc.textContent = "Vista Cruda (RGB)";
+                    overlay.classList.add('opacity-0');
+                    overlay.classList.remove('opacity-100');
+                    fpsCounter.textContent = "30";
+                    fpsCounter.classList.remove('text-error');
+                    fpsCounter.classList.add('text-white');
+                }
+            });
+
+            // Minor JS animation for FPS fluctuation to make it feel "live"
+            setInterval(() => {
+                const isProcessing = toggle.checked;
+                const baseFps = isProcessing ? 24 : 30;
+                const variance = Math.floor(Math.random() * 3) - 1; // -1 to +1
+                fpsCounter.textContent = baseFps + variance;
+            }, 2000);
+        });
+    </script>
+
+
+</body></html>

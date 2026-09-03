@@ -1,0 +1,284 @@
+<!DOCTYPE html><html class="light" lang="es" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Perfil - Ping</title>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Fonts: Inter & JetBrains Mono for the theme -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500;600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config Injection -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-dim": "#dbd9db",
+                    "on-tertiary-container": "#a88c69",
+                    "on-primary": "#ffffff",
+                    "on-primary-fixed-variant": "#38485a",
+                    "primary-fixed": "#d2e4fb",
+                    "surface-variant": "#e4e2e3",
+                    "tertiary-container": "#38260b",
+                    "tertiary-fixed": "#feddb5",
+                    "inverse-on-surface": "#f2f0f2",
+                    "on-secondary-fixed": "#001a41",
+                    "primary-container": "#1a2b3c",
+                    "on-tertiary-fixed": "#281802",
+                    "outline": "#74777d",
+                    "on-tertiary": "#ffffff",
+                    "tertiary": "#211200",
+                    "error": "#ba1a1a",
+                    "secondary-container": "#0070eb",
+                    "background": "#fbf9fa",
+                    "on-background": "#1b1c1d",
+                    "surface-container-low": "#f5f3f4",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-bright": "#fbf9fa",
+                    "secondary-fixed": "#d8e2ff",
+                    "on-secondary-fixed-variant": "#004493",
+                    "outline-variant": "#c4c6cd",
+                    "inverse-surface": "#303032",
+                    "secondary": "#0058bc",
+                    "error-container": "#ffdad6",
+                    "on-tertiary-fixed-variant": "#584326",
+                    "primary-fixed-dim": "#b7c8de",
+                    "surface-container-high": "#e9e7e9",
+                    "on-primary-fixed": "#0b1d2d",
+                    "on-surface-variant": "#44474c",
+                    "inverse-primary": "#b7c8de",
+                    "secondary-fixed-dim": "#adc6ff",
+                    "on-secondary-container": "#fefcff",
+                    "on-error": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "surface-container": "#efedef",
+                    "tertiary-fixed-dim": "#e1c29b",
+                    "surface": "#fbf9fa",
+                    "surface-tint": "#4f6073",
+                    "surface-container-highest": "#e4e2e3",
+                    "on-surface": "#1b1c1d",
+                    "on-secondary": "#ffffff",
+                    "primary": "#041627",
+                    "on-primary-container": "#8192a7"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-page": "20px",
+                    "safe-area-bottom": "34px",
+                    "gutter-grid": "16px",
+                    "stack-sm": "8px",
+                    "stack-md": "16px",
+                    "touch-target-min": "48px",
+                    "stack-lg": "24px"
+            },
+            "fontFamily": {
+                    "body-sm": [
+                            "Inter"
+                    ],
+                    "body-lg": [
+                            "Inter"
+                    ],
+                    "headline-lg": [
+                            "Inter"
+                    ],
+                    "headline-lg-mobile": [
+                            "Inter"
+                    ],
+                    "headline-md": [
+                            "Inter"
+                    ],
+                    "label-caps": [
+                            "JetBrains Mono"
+                    ],
+                    "status-number": [
+                            "JetBrains Mono"
+                    ]
+            },
+            "fontSize": {
+                    "body-sm": [
+                            "14px",
+                            {
+                                    "lineHeight": "20px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "body-lg": [
+                            "17px",
+                            {
+                                    "lineHeight": "24px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "headline-lg": [
+                            "32px",
+                            {
+                                    "lineHeight": "40px",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "headline-lg-mobile": [
+                            "24px",
+                            {
+                                    "lineHeight": "30px",
+                                    "letterSpacing": "-0.01em",
+                                    "fontWeight": "700"
+                            }
+                    ],
+                    "headline-md": [
+                            "20px",
+                            {
+                                    "lineHeight": "28px",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "label-caps": [
+                            "12px",
+                            {
+                                    "lineHeight": "16px",
+                                    "letterSpacing": "0.05em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "status-number": [
+                            "18px",
+                            {
+                                    "lineHeight": "24px",
+                                    "fontWeight": "500"
+                            }
+                    ]
+            }
+    },
+        },
+      }
+    </script>
+<style>
+        /* Hide scrollbar for cleaner mobile look */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        body {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-sm min-h-screen flex flex-col selection:bg-primary-fixed selection:text-on-primary-fixed antialiased">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-page h-touch-target-min bg-background/80 backdrop-blur-md">
+<!-- Leading Avatar -->
+<div class="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 border border-outline-variant/30">
+<img class="w-full h-full object-cover" data-alt="A tightly cropped, high-contrast monochrome portrait of a focused professional, modern corporate avatar style, subtle technological glint in the eye, extremely clean minimalist white background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA12o4VuUpR4FcIKWO57Z4DJ6Nhdfeh1bvUVX8oZPQVUEHgNN7d9oeqs32gcYZbXQpLsJSt-49DnExLH7rNqmHo4pxeji_1KMa59oCSo5HxIKBnUYc-RjJtJvFX2RQ8HcCcRAGG_jCb78DRVHFdXmzCxLBPyHkPzV0_esA3NVviBszuxtM9StqHSLmlQU4eyVjR-B9rmOJn5PTkV_bvJrsjZ1c9GJFGfZNKr4FK23Uj9Ot1JvhkaPwu">
+</div>
+<!-- Headline -->
+<h1 class="font-headline-md text-headline-md font-bold tracking-tighter text-primary">PING</h1>
+<!-- Trailing Icon -->
+<button class="flex-shrink-0 w-8 h-8 flex items-center justify-center text-primary hover:opacity-80 transition-opacity active:scale-95 duration-100 focus:outline-none">
+<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 0;">sensors</span>
+</button>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 pt-[calc(var(--spacing-touch-target-min)+var(--spacing-margin-page))] pb-[calc(var(--spacing-safe-area-bottom)+80px)] px-margin-page flex flex-col gap-stack-lg max-w-md mx-auto w-full">
+<!-- Profile Header Section -->
+<section class="flex flex-col items-center gap-stack-sm pt-4 animate-fade-in-up mt-8">
+<div class="relative group cursor-default">
+<div class="w-24 h-24 rounded-full overflow-hidden border-4 border-surface-container-lowest shadow-[0_4px_12px_rgba(4,22,39,0.08)] bg-surface-container">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="A professional headshot of a modern vehicle pilot or operator. The subject is wearing subtle, high-tech dark navy apparel. The lighting is crisp studio white, creating a clinical, authoritative, and reassuringly technical aesthetic characteristic of advanced corporate systems." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5hSJYFPVH7tmj172T-20gJOFPzGmjJIpe-YrD7QRQwjqhfyzhVXAYpg5UAByoK02yGt77ftmlmlQ338w14xcjhFFs0TWKHzxfE4aAHDUfiNWqLl7Ghbr03PmI6bpDDbWH6dmLe2icXBhlqYBiiveS6Pb4V_tAL1X8-P3TbyuOqNVrZhHLX-clGZLC4t1wzL4fV0gsApf08wJ8jroSZxbQRU6Ffi3k8eeEgLu5HHir618AK62-0Pgq">
+</div>
+<!-- Status indicator pip -->
+<div class="absolute bottom-1 right-1 w-5 h-5 bg-[#34C759] rounded-full border-2 border-surface-container-lowest shadow-sm"></div>
+</div>
+<div class="text-center mt-2">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface">Piloto Demo</h2>
+<p class="font-label-caps text-label-caps text-outline mt-1 tracking-widest uppercase"><br></p>
+</div>
+</section>
+<!-- Information Cards (Bento/Glassmorphism inspired, adhering to strict borders/backgrounds) -->
+<section class="flex flex-col gap-stack-md mt-4">
+<h3 class="font-label-caps text-label-caps text-outline ml-1">INFORMACIÓN OPERATIVA</h3>
+<!-- Input Group: Name -->
+<div class="bg-surface-container-lowest rounded-xl p-4 flex flex-col gap-1 border border-surface-container-high shadow-[0_2px_8px_rgba(4,22,39,0.04)]">
+<label class="font-label-caps text-label-caps text-outline">Nombre Completo</label>
+<div class="flex items-center mt-1">
+<span class="material-symbols-outlined text-on-surface-variant mr-3 text-[20px]">badge</span>
+<input class="bg-transparent border-none p-0 flex-1 font-body-lg text-body-lg text-on-surface focus:ring-0 cursor-default opacity-90" readonly="" type="text" value="Piloto Demo">
+</div>
+</div>
+<!-- Input Group: Email -->
+<div class="bg-surface-container-lowest rounded-xl p-4 flex flex-col gap-1 border border-surface-container-high shadow-[0_2px_8px_rgba(4,22,39,0.04)]">
+<label class="font-label-caps text-label-caps text-outline">Correo Electrónico</label>
+<div class="flex items-center mt-1">
+<span class="material-symbols-outlined text-on-surface-variant mr-3 text-[20px]">mail</span>
+<input class="bg-transparent border-none p-0 flex-1 font-body-lg text-body-lg text-on-surface focus:ring-0 cursor-default opacity-90" readonly="" type="email" value="piloto.demo@ping.auto">
+</div>
+</div>
+<!-- Input Group: Driving Preferences -->
+<div class="bg-surface-container-lowest rounded-xl p-4 flex flex-col gap-1 border border-surface-container-high shadow-[0_2px_8px_rgba(4,22,39,0.04)]">
+<div class="flex justify-between items-center w-full">
+<label class="font-label-caps text-label-caps text-outline">Preferencias de Conducción</label>
+<button class="text-secondary hover:text-primary transition-colors text-xs font-medium">EDITAR</button>
+</div>
+<div class="flex items-start mt-2">
+<span class="material-symbols-outlined text-on-surface-variant mr-3 mt-1 text-[20px]">tune</span>
+<div class="flex flex-col gap-2 w-full">
+<div class="bg-surface-container-high/50 rounded-lg p-3 flex justify-between items-center">
+<span class="font-body-sm text-body-sm text-on-surface">Modo Operativo</span>
+<span class="font-label-caps text-label-caps text-primary bg-primary-fixed px-2 py-0.5 rounded text-[10px]">EFICIENCIA</span>
+</div>
+<div class="bg-surface-container-high/50 rounded-lg p-3 flex justify-between items-center">
+<span class="font-body-sm text-body-sm text-on-surface">Alerta Háptica</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">ACTIVADA</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Danger Zone Action -->
+<section class="mt-8 mb-4">
+<button class="w-full flex items-center justify-center gap-2 h-touch-target-min rounded-xl border border-error/30 text-error bg-error-container/20 font-headline-md text-headline-md hover:bg-error-container/50 active:scale-[0.98] transition-all duration-200">
+<span class="material-symbols-outlined">logout</span>
+                Cerrar Sesión
+            </button>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 pt-2 pb-safe-area-bottom bg-surface-container-lowest shadow-[0_-4px_12px_rgba(4,22,39,0.15)] rounded-t-xl md:hidden">
+<!-- Inactive: Inicio -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-caps text-label-caps mt-1 text-[10px]">Inicio</span>
+</a>
+<!-- Inactive: Navegación -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">explore</span>
+<span class="font-label-caps text-label-caps mt-1 text-[10px]">Navegación</span>
+</a>
+<!-- Inactive: Telemetría -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-caps text-label-caps mt-1 text-[10px]">Telemetría</span>
+</a>
+<!-- Inactive: Visión -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined">visibility</span>
+<span class="font-label-caps text-label-caps mt-1 text-[10px]">Visión</span>
+</a>
+<!-- Active: Perfil -->
+<a class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container rounded-full px-4 py-1 scale-95 transition-transform duration-200 pointer-events-none" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1;">person</span>
+<span class="font-label-caps text-label-caps mt-1 text-[10px]">Perfil</span>
+</a>
+</nav>
+
+
+</body></html>
