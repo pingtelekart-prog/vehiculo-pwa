@@ -1735,7 +1735,7 @@
         if (spdGauge && spdVal) {
           const spdPct = (state.speed / 50) * 100;
           setGauge(spdGauge, spdPct);
-          spdVal.textContent = Math.round(state.speed);
+          spdVal.textContent = Number(state.speed).toFixed(1);
         }
 
         if (accGauge && accVal) {
@@ -1743,11 +1743,11 @@
           const absAcc = Math.abs(state.acceleration);
           const accPct = (absAcc / 5) * 100;
           setGauge(accGauge, accPct);
-          accVal.textContent = state.acceleration.toFixed(1);
+          accVal.textContent = Number(state.acceleration).toFixed(1);
         }
 
         if (battVal && battBar && battIcon) {
-          battVal.textContent = Math.round(state.battery) + '%';
+          battVal.textContent = Number(state.battery).toFixed(1) + '%';
           battBar.style.width = state.battery + '%';
           if (state.battery > 50) {
             battBar.style.backgroundColor = '#34C759';
@@ -1765,14 +1765,14 @@
         }
 
         if (fuelVal && fuelBar) {
-          fuelVal.textContent = Math.round(state.fuel) + '%';
+          fuelVal.textContent = Number(state.fuel).toFixed(1) + '%';
           fuelBar.style.width = state.fuel + '%';
         }
 
         if (tempVal) {
           // Temp: 20 -> 0%, 120 -> 100%
           const tempPct = Math.max(0, Math.min(100, ((state.temperature - 20) / 100) * 100));
-          tempVal.textContent = Math.round(state.temperature) + '°C';
+          tempVal.textContent = Number(state.temperature).toFixed(1) + '°C';
           if (tempMask) tempMask.style.width = (100 - tempPct) + '%';
         }
 
