@@ -1604,6 +1604,8 @@
       }
 
       map.on('click', async (e) => {
+        if (!isSelectingRoute) return;
+
         const { lat, lng } = e.latlng;
 
         // Show validating overlay
