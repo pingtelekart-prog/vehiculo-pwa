@@ -1439,15 +1439,15 @@
       window.pingMap = map;
       window.vehicleMarker = L.marker([initialLat, initialLng], { icon: buggyIcon, zIndexOffset: 1000 }).addTo(map);
 
-      // Destination Pin
+      // Destination Pin (Pink/Rose)
       const pinIcon = L.divIcon({
         html: `
         <div class="relative flex flex-col items-center" style="transform: translate(-50%, -100%); z-index: 100;">
-          <div class="w-10 h-10 bg-error rounded-full flex items-center justify-center shadow-lg border-2 border-surface-container-lowest animate-bounce">
-            <span class="material-symbols-outlined text-on-error" style="font-size: 20px; font-variation-settings:'FILL' 1;">location_on</span>
+          <div style="width:40px;height:40px;background:#f43f8e;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(244,63,142,0.5);border:2px solid #fff;animation:bounce 1s infinite alternate;">
+            <span class="material-symbols-outlined" style="font-size:20px;font-variation-settings:'FILL' 1;color:#fff;">location_on</span>
           </div>
-          <div class="w-1 h-3 bg-error mt-[-4px]"></div>
-          <div class="w-4 h-1.5 bg-black/50 rounded-[50%] blur-[2px]"></div>
+          <div style="width:4px;height:12px;background:#f43f8e;margin-top:-4px;"></div>
+          <div style="width:16px;height:6px;background:rgba(0,0,0,0.35);border-radius:50%;filter:blur(2px);"></div>
         </div>
       `,
         className: '',
@@ -1580,9 +1580,30 @@
 
       const validatingOverlay = document.getElementById('map-validating-overlay');
 
-      map.on('click', async (e) => {
-        if (!isSelectingRoute) return;
+      // Helper to place/move the destination pin
+      function setDestinationPin(lat, lng) {
+        selectedDestination = { lat, lng };
+        if (destinationMarker) map.removeLayer(destinationMarker);
+        destinationMarker = L.marker([lat, lng], { icon: pinIcon }).addTo(map);
 
+        // Auto-exit selection mode if active
+        if (isSelectingRoute) {
+          isSelectingRoute = false;
+          btnSelect.classList.remove('bg-secondary', 'text-on-secondary');
+          btnSelect.classList.add('bg-surface-container-high', 'text-on-surface-variant');
+          selectText.textContent = 'Seleccionar Ruta';
+          document.getElementById('ping-map').style.cursor = '';
+        }
+
+        updateStartButton();
+
+        // Re-open sheet so user sees the Start button enabled
+        if (!sheetExpanded) {
+          bottomSheetHandle.click();
+        }
+      }
+
+      map.on('click', async (e) => {
         const { lat, lng } = e.latlng;
 
         // Show validating overlay
@@ -1594,37 +1615,35 @@
 
         if (!result.valid) {
           showMapToast('Destino inválido: No se encontró una vía transitable en un radio de 50 metros.');
-          return; // Do NOT place marker
+          return;
         }
 
-        // Snap to road (Acoplamiento automático)
+        // Snap to nearest road point
         const snappedLat = result.lat !== undefined ? result.lat : lat;
         const snappedLng = result.lng !== undefined ? result.lng : lng;
 
-        selectedDestination = { lat: snappedLat, lng: snappedLng };
-
-        if (destinationMarker) map.removeLayer(destinationMarker);
-        destinationMarker = L.marker([snappedLat, snappedLng], { icon: pinIcon }).addTo(map);
-
-        // Auto-exit selection mode
-        isSelectingRoute = false;
-        btnSelect.classList.remove('bg-secondary', 'text-on-secondary');
-        btnSelect.classList.add('bg-surface-container-high', 'text-on-surface-variant');
-        selectText.textContent = 'Seleccionar Ruta';
-        document.getElementById('ping-map').style.cursor = '';
-
-        updateStartButton();
-
-        // Re-open sheet
-        if (!sheetExpanded) {
-          bottomSheetHandle.click();
-        }
+        setDestinationPin(snappedLat, snappedLng);
+        showMapToast(`📍 Destino fijado: ${snappedLat.toFixed(5)}, ${snappedLng.toFixed(5)}`);
       });
 
       btnStart.addEventListener('click', () => {
         if (!selectedDestination) return;
 
-        alert(`Enviando coordenadas [${selectedDestination.lat.toFixed(5)}, ${selectedDestination.lng.toFixed(5)}] al vehículo "PING-01"...`);
+        const payload = {
+          latitud: selectedDestination.lat,
+          longitud: selectedDestination.lng,
+          timestamp: Date.now()
+        };
+
+        // Emit navigation command via Socket.io
+        if (window.pingSocket) {
+          window.pingSocket.emit('comando_navegacion', payload);
+          console.log('[Navegación] Comando emitido:', payload);
+        } else {
+          console.warn('[Navegación] Socket no disponible todavía.');
+        }
+
+        showMapToast('✅ Comando de navegación enviado al vehículo');
 
         if (destinationMarker) {
           map.removeLayer(destinationMarker);
@@ -1665,7 +1684,7 @@
 
       btnLocateMe.addEventListener('click', () => {
         if (!navigator.geolocation) {
-          alert("Tu navegador no soporta geolocalización.");
+          showMapToast('Tu navegador no soporta geolocalización.');
           return;
         }
 
@@ -1677,18 +1696,15 @@
             const lat = pos.coords.latitude;
             const lng = pos.coords.longitude;
 
-            selectedDestination = { lat, lng };
-            if (destinationMarker) map.removeLayer(destinationMarker);
-            destinationMarker = L.marker([lat, lng], { icon: pinIcon }).addTo(map);
-
+            setDestinationPin(lat, lng);
             map.flyTo([lat, lng], 17, { animate: true, duration: 1.2 });
-            updateStartButton();
+            showMapToast(`📍 Tu ubicación fijada como destino`);
 
             btnLocateMe.classList.remove('opacity-50', 'pointer-events-none');
             btnLocateMe.innerHTML = `<span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0">person_pin_circle</span> Búscame`;
           },
           (err) => {
-            alert("No se pudo obtener la ubicación. Verifica los permisos de tu navegador.");
+            showMapToast('No se pudo obtener la ubicación. Verifica los permisos.');
             btnLocateMe.classList.remove('opacity-50', 'pointer-events-none');
             btnLocateMe.innerHTML = `<span class="material-symbols-outlined" style="font-variation-settings:'FILL' 0">person_pin_circle</span> Búscame`;
           }
@@ -1730,6 +1746,8 @@
       const socket = io('https://vehiculo-backend.onrender.com', {
         transports: ['websocket', 'polling']
       });
+      // Expose socket globally so other modules (map) can emit events
+      window.pingSocket = socket;
 
       const updateUI = () => {
         // UI Updates with DOM checks
