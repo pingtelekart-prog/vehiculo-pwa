@@ -1791,7 +1791,7 @@
       socket.on('telemetria', (data) => {
         console.log('Datos recibidos del backend:', data);
 
-        const { velocidad, bateria, combustible, temperatura, aceleracion, distancia, modo, latitud, longitud } = data;
+        const { velocidad, bateria, combustible, temperatura, aceleracion, distancia, modo } = data;
 
         // Actualizar variables de estado de los indicadores
         if (velocidad !== undefined) state.speed = parseVal(velocidad);
@@ -1807,6 +1807,16 @@
           if (modoEl) modoEl.textContent = modo;
         }
 
+        // La actualización de latitud y longitud ahora se maneja en el evento 'localizacion'
+
+        // Refrescar los indicadores principales
+        updateUI();
+      });
+
+      socket.on('localizacion', (data) => {
+        console.log('Localización recibida:', data);
+        const { latitud, longitud } = data;
+        
         if (latitud !== undefined && longitud !== undefined) {
           const latEl = document.getElementById('tele-lat-val');
           const lonEl = document.getElementById('tele-lon-val');
@@ -1820,9 +1830,6 @@
             window.pingMap.panTo([latNum, lonNum], { animate: true });
           }
         }
-
-        // Refrescar los indicadores principales
-        updateUI();
       });
 
       // Inicializar la interfaz visual con los valores en 0
