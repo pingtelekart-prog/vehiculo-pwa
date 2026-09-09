@@ -1852,6 +1852,44 @@
         }
       });
 
+      // Variable para rastrear la polilínea de ruta activa
+      let routePolyline = null;
+
+      socket.on('ruta_calculada', (data) => {
+        console.log('[Ruta Calculada] Datos recibidos:', data);
+
+        if (!data || !data.coordenadas || !Array.isArray(data.coordenadas)) {
+          console.warn('[Ruta Calculada] Formato de datos inválido.');
+          return;
+        }
+
+        if (!window.pingMap) {
+          console.warn('[Ruta Calculada] El mapa no está disponible.');
+          return;
+        }
+
+        // Limpiar ruta previa antes de trazar la nueva
+        if (routePolyline) {
+          window.pingMap.removeLayer(routePolyline);
+          routePolyline = null;
+        }
+
+        // OSRM devuelve [longitud, latitud] → Leaflet necesita [latitud, longitud]
+        const latlngs = data.coordenadas.map(coord => [coord[1], coord[0]]);
+
+        routePolyline = L.polyline(latlngs, {
+          color: '#0058bc',
+          weight: 5,
+          opacity: 0.85,
+          lineJoin: 'round',
+          lineCap: 'round'
+        }).addTo(window.pingMap);
+
+        // Ajustar el mapa para encuadrar la ruta completa
+        window.pingMap.fitBounds(routePolyline.getBounds(), { padding: [40, 40], animate: true });
+        console.log('[Ruta Calculada] Polilínea dibujada con', latlngs.length, 'puntos.');
+      });
+
       // Inicializar la interfaz visual con los valores en 0
       updateUI();
     }
