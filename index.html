@@ -1848,12 +1848,36 @@
           if (!isNaN(latNum) && !isNaN(lonNum) && window.vehicleMarker && window.pingMap) {
             window.vehicleMarker.setLatLng([latNum, lonNum]);
             window.pingMap.panTo([latNum, lonNum], { animate: true });
+
+            if (rutaPendiente && rutaPendiente.length > 0 && routePolyline) {
+              const currentPos = L.latLng(latNum, lonNum);
+              let closestIndex = 0;
+              let minDistance = Infinity;
+
+              // Buscar el punto más cercano en un margen para mayor eficiencia
+              const searchWindow = Math.min(20, rutaPendiente.length);
+              for (let i = 0; i < searchWindow; i++) {
+                const routePos = L.latLng(rutaPendiente[i][0], rutaPendiente[i][1]);
+                const distance = currentPos.distanceTo(routePos);
+                if (distance < minDistance) {
+                  minDistance = distance;
+                  closestIndex = i;
+                }
+              }
+
+              // Recortar la ruta y actualizar polilínea dinámicamente
+              if (closestIndex > 0) {
+                rutaPendiente = rutaPendiente.slice(closestIndex);
+                routePolyline.setLatLngs(rutaPendiente);
+              }
+            }
           }
         }
       });
 
-      // Variable para rastrear la polilínea de ruta activa
+      // Variables para rastrear la polilínea de ruta activa y coordenadas pendientes
       let routePolyline = null;
+      let rutaPendiente = [];
 
       socket.on('ruta_calculada', (data) => {
         console.log('[Ruta Calculada] Datos recibidos:', data);
@@ -1876,6 +1900,7 @@
 
         // OSRM devuelve [longitud, latitud] → Leaflet necesita [latitud, longitud]
         const latlngs = data.coordenadas.map(coord => [coord[1], coord[0]]);
+        rutaPendiente = latlngs;
 
         routePolyline = L.polyline(latlngs, {
           color: '#0058bc',
